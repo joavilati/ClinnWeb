@@ -8,18 +8,40 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Pencil, Plus, X, Loader2, RefreshCw, Building2, Phone, MapPin } from 'lucide-react'
+import { Pencil, Loader2, RefreshCw, Building2, Phone, MapPin } from 'lucide-react'
 import { toast } from 'sonner'
-import { formatPhone, extractPhoneDigits } from '@/lib/masks'
+import { formatPhone, extractPhoneDigits, formatCnpj, extractCnpjDigits, formatCep, extractCepDigits } from '@/lib/masks'
 import { useApiClient } from '@/hooks/useApiClient'
 import { useCachedData } from '@/hooks/useCachedData'
 import { CACHE_KEYS } from '@/lib/localCache'
 import type { ProfileData } from '@/types'
+import { MunicipioAutocomplete } from '@/components/MunicipioAutocomplete'
 
 const estados = [
   'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG',
   'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
 ]
+
+const ufByName: Record<string, string> = {
+  'ACRE': 'AC', 'ALAGOAS': 'AL', 'AMAPÁ': 'AP', 'AMAPA': 'AP', 'AMAZONAS': 'AM',
+  'BAHIA': 'BA', 'CEARÁ': 'CE', 'CEARA': 'CE', 'DISTRITO FEDERAL': 'DF',
+  'ESPÍRITO SANTO': 'ES', 'ESPIRITO SANTO': 'ES', 'GOIÁS': 'GO', 'GOIAS': 'GO',
+  'MARANHÃO': 'MA', 'MARANHAO': 'MA', 'MATO GROSSO': 'MT', 'MATO GROSSO DO SUL': 'MS',
+  'MINAS GERAIS': 'MG', 'PARÁ': 'PA', 'PARA': 'PA', 'PARAÍBA': 'PB', 'PARAIBA': 'PB',
+  'PARANÁ': 'PR', 'PARANA': 'PR', 'PERNAMBUCO': 'PE', 'PIAUÍ': 'PI', 'PIAUI': 'PI',
+  'RIO DE JANEIRO': 'RJ', 'RIO GRANDE DO NORTE': 'RN', 'RIO GRANDE DO SUL': 'RS',
+  'RONDÔNIA': 'RO', 'RONDONIA': 'RO', 'RORAIMA': 'RR', 'SANTA CATARINA': 'SC',
+  'SÃO PAULO': 'SP', 'SAO PAULO': 'SP', 'SERGIPE': 'SE', 'TOCANTINS': 'TO',
+}
+
+function toUF(value: string): string {
+  if (!value) return ''
+  const upper = value.toUpperCase().trim()
+  // Já é sigla (2 letras)
+  if (upper.length === 2 && estados.includes(upper)) return upper
+  // Nome completo → sigla
+  return ufByName[upper] || value
+}
 
 export default function PerfilPage() {
   const router = useRouter()
@@ -27,15 +49,28 @@ export default function PerfilPage() {
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [reloading, setReloading] = useState(false)
-  const [newCnae, setNewCnae] = useState('')
 
   const normalizeProfile = useCallback((raw: unknown): ProfileData => {
     const obj = (raw && typeof raw === 'object') ? raw as Record<string, unknown> : {}
     const data = (obj.data && typeof obj.data === 'object') ? obj.data as Record<string, unknown> : obj
     return {
-      ...data,
+      razaoSocial: String(data.razaoSocial || ''),
+      nomeFantasia: String(data.nomeFantasia || ''),
+      cnpj: String(data.cnpj || ''),
+      inscricaoMunicipal: String(data.inscricaoMunicipal || ''),
+      regimeTributario: String(data.regimeTributario || ''),
       cnaes: Array.isArray(data.cnaes) ? data.cnaes : [],
-    } as ProfileData
+      email: String(data.email || ''),
+      telefone: String(data.telefone || ''),
+      cep: String(data.cep || ''),
+      logradouro: String(data.logradouro || ''),
+      numero: String(data.numero || ''),
+      complemento: String(data.complemento || ''),
+      bairro: String(data.bairro || ''),
+      estado: toUF(String(data.uf || data.estado || '')),
+      municipio: String(data.cidade || data.municipio || ''),
+      codigoMunicipio: String(data.codigoMunicipio || data.cityCode || ''),
+    }
   }, [])
 
   const { data: profile, error, isLoading, reload, updateCache } = useCachedData<ProfileData>({
@@ -60,6 +95,7 @@ export default function PerfilPage() {
     bairro: '',
     estado: '',
     municipio: '',
+    codigoMunicipio: '',
   })
 
   useEffect(() => {
@@ -74,7 +110,8 @@ export default function PerfilPage() {
   const handleSave = async () => {
     setIsSaving(true)
     try {
-      const { cnaes, ...payload } = profileData
+      const { cnaes, estado, municipio, ...rest } = profileData
+      const payload = { ...rest, uf: estado, cidade: municipio }
       const res = await apiFetch('/api/profile', {
         method: 'PUT',
         body: JSON.stringify(payload),
@@ -99,23 +136,6 @@ export default function PerfilPage() {
       setProfileData(profile)
     }
     setIsEditing(false)
-  }
-
-  const handleAddCnae = () => {
-    if (newCnae.trim()) {
-      setProfileData({
-        ...profileData,
-        cnaes: [...(profileData.cnaes || []), newCnae],
-      })
-      setNewCnae('')
-    }
-  }
-
-  const handleRemoveCnae = (index: number) => {
-    setProfileData({
-      ...profileData,
-      cnaes: (profileData.cnaes || []).filter((_, i) => i !== index),
-    })
   }
 
   if (isLoading) {
@@ -201,24 +221,15 @@ export default function PerfilPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100">
                       <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">CNPJ</p>
-                      <p className="font-semibold text-gray-900">{profileData.cnpj || '-'}</p>
+                      <p className="font-semibold text-gray-900">{profileData.cnpj ? formatCnpj(profileData.cnpj) : '-'}</p>
                     </div>
                     <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100">
                       <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Inscrição Municipal</p>
                       <p className="font-semibold text-gray-900">{profileData.inscricaoMunicipal || '-'}</p>
                     </div>
-                    <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100">
+                    <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100 md:col-span-2">
                       <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Regime Tributário</p>
                       <p className="font-semibold text-gray-900">{profileData.regimeTributario || '-'}</p>
-                    </div>
-                    <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100">
-                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">CNAE Principal</p>
-                      {(profileData.cnaes || []).length > 0
-                        ? profileData.cnaes.map((cnae, index) => (
-                            <p key={index} className="font-semibold text-gray-900">{cnae}</p>
-                          ))
-                        : <p className="font-semibold text-gray-900">-</p>
-                      }
                     </div>
                   </div>
                 </CardContent>
@@ -243,7 +254,7 @@ export default function PerfilPage() {
                     </div>
                     <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100">
                       <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Telefone</p>
-                      <p className="font-semibold text-gray-900">{profileData.telefone || '-'}</p>
+                      <p className="font-semibold text-gray-900">{profileData.telefone ? formatPhone(profileData.telefone) : '-'}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -264,7 +275,7 @@ export default function PerfilPage() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                     <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100">
                       <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">CEP</p>
-                      <p className="font-semibold text-gray-900">{profileData.cep || '-'}</p>
+                      <p className="font-semibold text-gray-900">{profileData.cep ? formatCep(profileData.cep) : '-'}</p>
                     </div>
                     <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100 md:col-span-2">
                       <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Logradouro</p>
@@ -281,6 +292,10 @@ export default function PerfilPage() {
                     <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100">
                       <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Município / UF</p>
                       <p className="font-semibold text-gray-900">{profileData.municipio || '-'}{profileData.estado ? ` - ${profileData.estado}` : ''}</p>
+                    </div>
+                    <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Código IBGE</p>
+                      <p className="font-semibold text-gray-900">{profileData.codigoMunicipio || '-'}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -326,8 +341,9 @@ export default function PerfilPage() {
                   <div className="space-y-2">
                     <Label>CNPJ</Label>
                     <Input
-                      value={profileData.cnpj}
-                      onChange={(e) => setProfileData({ ...profileData, cnpj: e.target.value })}
+                      value={formatCnpj(profileData.cnpj)}
+                      onChange={(e) => setProfileData({ ...profileData, cnpj: extractCnpjDigits(e.target.value) })}
+                      placeholder="00.000.000/0000-00"
                     />
                   </div>
                   <div className="space-y-2">
@@ -346,40 +362,6 @@ export default function PerfilPage() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label>CNAE</Label>
-                  <div className="space-y-2">
-                    {(profileData.cnaes || []).map((cnae, index) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <Input value={cnae} readOnly className="flex-1" />
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleRemoveCnae(index)}
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    ))}
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Adicionar novo CNAE"
-                        value={newCnae}
-                        onChange={(e) => setNewCnae(e.target.value)}
-                        className="flex-1"
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handleAddCnae}
-                      >
-                        <Plus className="w-4 h-4 mr-2" />
-                        Adicionar
-                      </Button>
-                    </div>
-                  </div>
-                </div>
               </CardContent>
             </Card>
 
@@ -420,8 +402,9 @@ export default function PerfilPage() {
                   <div className="space-y-2">
                     <Label>CEP</Label>
                     <Input
-                      value={profileData.cep}
-                      onChange={(e) => setProfileData({ ...profileData, cep: e.target.value })}
+                      value={formatCep(profileData.cep)}
+                      onChange={(e) => setProfileData({ ...profileData, cep: extractCepDigits(e.target.value) })}
+                      placeholder="00000-000"
                     />
                   </div>
                   <div className="space-y-2 col-span-2">
@@ -476,9 +459,22 @@ export default function PerfilPage() {
                   </div>
                   <div className="space-y-2">
                     <Label>Município</Label>
-                    <Input
+                    <MunicipioAutocomplete
                       value={profileData.municipio}
-                      onChange={(e) => setProfileData({ ...profileData, municipio: e.target.value })}
+                      estado={profileData.estado}
+                      onChange={(name, code) => setProfileData({ ...profileData, municipio: name, codigoMunicipio: code })}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label>Código do Município (IBGE)</Label>
+                    <Input
+                      value={profileData.codigoMunicipio}
+                      readOnly
+                      className="bg-gray-50 text-gray-600"
+                      placeholder="Selecione o município acima"
                     />
                   </div>
                 </div>

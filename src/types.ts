@@ -149,6 +149,7 @@ export interface ProfileData {
   bairro: string
   estado: string
   municipio: string
+  codigoMunicipio: string
 }
 
 // ===== License =====

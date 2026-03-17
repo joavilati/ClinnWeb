@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Search, Plus, Check, User, FileText, Loader2, RefreshCw } from 'lucide-react'
+import { Search, Plus, Check, User, FileText, Loader2, RefreshCw, Pencil } from 'lucide-react'
 import { toast } from 'sonner'
 import { useApiClient } from '@/hooks/useApiClient'
 import { useCachedData } from '@/hooks/useCachedData'
@@ -32,6 +32,7 @@ import { CACHE_KEYS, removeCache } from '@/lib/localCache'
 import { isLicenseActive } from '@/lib/licenseGuard'
 import { LicenseExpiredModal } from '@/components/LicenseExpiredModal'
 import { formatMoney, extractMoneyDigits, moneyDigitsToNumber, numberToMoneyDigits, formatPercent, percentDigitsToNumber } from '@/lib/masks'
+import { MunicipioAutocomplete } from '@/components/MunicipioAutocomplete'
 
 const estados = [
   'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG',
@@ -100,12 +101,14 @@ export default function NovaNotaPage() {
   const [aliquotaIss, setAliquotaIss] = useState('')
   const [valorTotalRetido, setValorTotalRetido] = useState('')
   const [showNewClientModal, setShowNewClientModal] = useState(false)
+  const [editingClientId, setEditingClientId] = useState<string | null>(null)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [sendCopy, setSendCopy] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [emitting, setEmitting] = useState(false)
   const [savingClient, setSavingClient] = useState(false)
   const [emittedNoteNumber, setEmittedNoteNumber] = useState('')
+  const [emittedNoteId, setEmittedNoteId] = useState('')
 
   const [newClientData, setNewClientData] = useState<CreateClientRequest>({
     razaoSocial: '',
@@ -222,14 +225,17 @@ export default function NovaNotaPage() {
       const res = await apiFetch('/api/nfse/emitir', {
         method: 'POST',
         body: JSON.stringify({
+          valorServico: numericValue,
+          ambiente: 'HOMOLOGACAO',
           clientId: selectedClient.id,
           serviceId: selectedServiceData.id,
-          valorServico: numericValue,
-          issRetidoNaFonte: issRetido,
-          responsavelRetencao: issRetido ? responsavelRetencao : undefined,
-          aliquotaIss: issRetido ? numericAliquota : undefined,
-          valorTotalRetido: issRetido ? numericValorRetido : undefined,
-          sendEmailCopy: sendCopy,
+          descricaoServico: selectedServiceData.description || selectedServiceData.name,
+          issRetido,
+          ...(issRetido && {
+            responsavelRetencao,
+            aliquotaIss: numericAliquota,
+            valorTotalRetido: numericValorRetido,
+          }),
         }),
       })
 
@@ -240,6 +246,7 @@ export default function NovaNotaPage() {
 
       const data = await res.json()
       setEmittedNoteNumber(data?.numeroNota || '')
+      setEmittedNoteId(data?.id || '')
       setShowSuccessModal(true)
       // Invalidar caches que dependem de notas
       removeCache(CACHE_KEYS.NOTES)
@@ -296,6 +303,57 @@ export default function NovaNotaPage() {
     }
   }
 
+  const handleEditClient = (client: Client, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setEditingClientId(client.id)
+    setNewClientData({
+      razaoSocial: client.companyName,
+      documentType: client.documentType,
+      document: client.cpfCnpj,
+      email: client.email || '',
+      phone: client.phone || '',
+      cep: client.address?.cep || '',
+      logradouro: client.address?.logradouro || '',
+      numero: client.address?.numero || '',
+      complemento: client.address?.complemento || '',
+      bairro: client.address?.bairro || '',
+      estado: client.address?.estado || '',
+      municipio: client.address?.municipio || '',
+    })
+    setShowNewClientModal(true)
+  }
+
+  const handleSaveEditClient = async () => {
+    if (!editingClientId || !newClientData.razaoSocial || !newClientData.document) {
+      toast.error('Preencha o nome e documento do cliente')
+      return
+    }
+    setSavingClient(true)
+    try {
+      const res = await apiFetch(`/api/clients/${editingClientId}`, {
+        method: 'PUT',
+        body: JSON.stringify(newClientData),
+      })
+      if (!res.ok) {
+        const err = await res.json().catch(() => null)
+        throw new Error(err?.message || 'Erro ao atualizar cliente')
+      }
+      toast.success('Cliente atualizado com sucesso!')
+      setShowNewClientModal(false)
+      setEditingClientId(null)
+      setNewClientData({
+        razaoSocial: '', documentType: 'CPF', document: '', email: '', phone: '',
+        cep: '', logradouro: '', numero: '', complemento: '', bairro: '', estado: '', municipio: '',
+      })
+      await reloadClients()
+    } catch (err: unknown) {
+      const error = err as Error
+      toast.error(error.message || 'Erro ao atualizar cliente')
+    } finally {
+      setSavingClient(false)
+    }
+  }
+
   const resetWizard = () => {
     setShowSuccessModal(false)
     setStep('clients')
@@ -308,6 +366,7 @@ export default function NovaNotaPage() {
     setAliquotaIss('')
     setValorTotalRetido('')
     setEmittedNoteNumber('')
+    setEmittedNoteId('')
   }
 
   const licenseModal = <LicenseExpiredModal open={showLicenseModal} onClose={() => setShowLicenseModal(false)} />
@@ -394,6 +453,13 @@ export default function NovaNotaPage() {
                               </p>
                             </div>
                           </div>
+                          <button
+                            onClick={(e) => handleEditClient(client, e)}
+                            className="p-2 rounded-lg text-gray-400 hover:text-[#7C3AED] hover:bg-[#FAF5FF] transition-colors opacity-0 group-hover:opacity-100"
+                            title="Editar cliente"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -404,14 +470,14 @@ export default function NovaNotaPage() {
           </div>
 
           {/* New Client Modal */}
-          <Dialog open={showNewClientModal} onOpenChange={setShowNewClientModal}>
+          <Dialog open={showNewClientModal} onOpenChange={(open) => { setShowNewClientModal(open); if (!open) setEditingClientId(null) }}>
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
               {/* Header */}
               <div className="px-8 pt-8 pb-4">
                 <DialogHeader>
-                  <DialogTitle className="text-xl font-bold text-gray-900">Novo Cliente</DialogTitle>
+                  <DialogTitle className="text-xl font-bold text-gray-900">{editingClientId ? 'Editar Cliente' : 'Novo Cliente'}</DialogTitle>
                   <DialogDescription className="text-gray-500">
-                    Preencha os dados do cliente para cadastrá-lo no sistema
+                    {editingClientId ? 'Atualize os dados do cliente' : 'Preencha os dados do cliente para cadastrá-lo no sistema'}
                   </DialogDescription>
                 </DialogHeader>
               </div>
@@ -595,13 +661,12 @@ export default function NovaNotaPage() {
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-sm text-gray-700">Município</Label>
-                      <Input
-                        value={newClientData.municipio}
-                        onChange={(e) =>
-                          setNewClientData({ ...newClientData, municipio: e.target.value })
+                      <MunicipioAutocomplete
+                        value={newClientData.municipio || ''}
+                        estado={newClientData.estado || ''}
+                        onChange={(name) =>
+                          setNewClientData({ ...newClientData, municipio: name })
                         }
-                        placeholder="Nome da cidade"
-                        className="h-11 bg-white border-gray-300"
                       />
                     </div>
                   </div>
@@ -621,7 +686,7 @@ export default function NovaNotaPage() {
                     Cancelar
                   </Button>
                   <Button
-                    onClick={handleSaveNewClient}
+                    onClick={editingClientId ? handleSaveEditClient : handleSaveNewClient}
                     className="flex-1 h-11 bg-[#7C3AED] hover:bg-[#6D28D9] text-white"
                     disabled={savingClient}
                   >
@@ -630,6 +695,8 @@ export default function NovaNotaPage() {
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                         Salvando...
                       </>
+                    ) : editingClientId ? (
+                      'Salvar Alterações'
                     ) : (
                       'Salvar Cliente'
                     )}
@@ -1235,7 +1302,7 @@ export default function NovaNotaPage() {
                   </Button>
                   <Button
                     className="flex-1 bg-[#7C3AED] hover:bg-[#6D28D9] text-white"
-                    onClick={() => router.push('/notas-emitidas')}
+                    onClick={() => router.push(emittedNoteId ? `/notas-emitidas/${emittedNoteId}` : '/notas-emitidas')}
                   >
                     Visualizar NFS-e
                   </Button>
