@@ -78,6 +78,7 @@ export default function NotasEmitidasPage() {
   const [cancelMotivo, setCancelMotivo] = useState('')
   const [cancelNoteId, setCancelNoteId] = useState<string | null>(null)
   const [showLicenseModal, setShowLicenseModal] = useState(false)
+  const [reloading, setReloading] = useState(false)
 
   const { data: allNotes, error, isLoading, reload } = useCachedData<NfseNote[]>({
     cacheKey: CACHE_KEYS.NOTES,
@@ -185,7 +186,7 @@ export default function NotasEmitidasPage() {
             <div className="py-6">
               <div className="flex items-center gap-3 mb-2">
                 <h1 className="text-4xl font-bold text-gray-900">Notas Emitidas</h1>
-                <button onClick={reload} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors" title="Recarregar"><RefreshCw className="w-5 h-5" /></button>
+                <button onClick={async () => { setReloading(true); await reload(); setReloading(false); toast.success('Dados atualizados') }} disabled={reloading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
               </div>
               <p className="text-gray-600">Gerencie e acompanhe todas as suas notas fiscais</p>
             </div>

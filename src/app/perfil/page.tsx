@@ -8,8 +8,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Pencil, Plus, X, Loader2, RefreshCw } from 'lucide-react'
+import { Pencil, Plus, X, Loader2, RefreshCw, Building2, Phone, MapPin } from 'lucide-react'
 import { toast } from 'sonner'
+import { formatPhone, extractPhoneDigits } from '@/lib/masks'
 import { useApiClient } from '@/hooks/useApiClient'
 import { useCachedData } from '@/hooks/useCachedData'
 import { CACHE_KEYS } from '@/lib/localCache'
@@ -25,6 +26,7 @@ export default function PerfilPage() {
   const { apiFetch } = useApiClient()
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [reloading, setReloading] = useState(false)
   const [newCnae, setNewCnae] = useState('')
 
   const normalizeProfile = useCallback((raw: unknown): ProfileData => {
@@ -72,9 +74,10 @@ export default function PerfilPage() {
   const handleSave = async () => {
     setIsSaving(true)
     try {
+      const { cnaes, ...payload } = profileData
       const res = await apiFetch('/api/profile', {
         method: 'PUT',
-        body: JSON.stringify(profileData),
+        body: JSON.stringify(payload),
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
@@ -146,112 +149,138 @@ export default function PerfilPage() {
   if (!isEditing) {
     return (
       <DashboardLayout>
-        <div className="p-8">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/20 to-gray-50 p-8">
           <div className="max-w-5xl mx-auto">
-            <div className="mb-8 flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">Perfil da Empresa</h1>
-                <p className="text-gray-600 mt-2">Informações cadastrais da sua empresa</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <button onClick={reload} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors" title="Recarregar"><RefreshCw className="w-5 h-5" /></button>
-                <Button
-                  onClick={() => setIsEditing(true)}
-                  className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white"
-                >
-                  <Pencil className="w-4 h-4 mr-2" />
-                  Editar
-                </Button>
+            {/* Header */}
+            <div className="mb-8 relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-[#7C3AED]/10 to-transparent rounded-3xl -z-10"></div>
+              <div className="py-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-3 mb-2">
+                      <h1 className="text-4xl font-bold text-gray-900">Perfil da Empresa</h1>
+                      <button onClick={async () => { setReloading(true); await reload(); setReloading(false); toast.success('Dados atualizados') }} disabled={reloading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
+                    </div>
+                    <p className="text-gray-600">Informações cadastrais da sua empresa</p>
+                  </div>
+                  <Button
+                    onClick={() => setIsEditing(true)}
+                    className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white"
+                  >
+                    <Pencil className="w-4 h-4 mr-2" />
+                    Editar
+                  </Button>
+                </div>
               </div>
             </div>
 
+            {/* Company Name Banner */}
+            <Card className="border-none shadow-lg mb-6 overflow-hidden">
+              <div className="bg-gradient-to-r from-[#7C3AED] to-[#9F67FF] p-5">
+                <p className="text-white/80 text-sm">Razão Social</p>
+                <p className="text-white text-xl font-bold">{profileData.razaoSocial || '-'}</p>
+                {profileData.nomeFantasia && (
+                  <p className="text-white/70 text-sm mt-1">{profileData.nomeFantasia}</p>
+                )}
+              </div>
+            </Card>
+
             <div className="space-y-6">
               {/* Dados Gerais */}
-              <Card className="border-none shadow-md">
-                <CardHeader className="bg-purple-50 border-b">
-                  <CardTitle>Dados Gerais</CardTitle>
+              <Card className="border-none shadow-lg overflow-hidden">
+                <div className="h-1 bg-gradient-to-r from-[#7C3AED] to-[#9F67FF]"></div>
+                <CardHeader className="border-b border-gray-100">
+                  <CardTitle className="text-lg flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-[#7C3AED]/10 flex items-center justify-center">
+                      <Building2 className="w-5 h-5 text-[#7C3AED]" />
+                    </div>
+                    Dados Gerais
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-6">
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <p className="text-sm text-gray-600 mb-1">Razão Social</p>
-                      <p className="font-medium text-gray-900">{profileData.razaoSocial}</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">CNPJ</p>
+                      <p className="font-semibold text-gray-900">{profileData.cnpj || '-'}</p>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-600 mb-1">Nome Fantasia</p>
-                      <p className="font-medium text-gray-900">{profileData.nomeFantasia}</p>
+                    <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Inscrição Municipal</p>
+                      <p className="font-semibold text-gray-900">{profileData.inscricaoMunicipal || '-'}</p>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-600 mb-1">CNPJ</p>
-                      <p className="font-medium text-gray-900">{profileData.cnpj}</p>
+                    <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Regime Tributário</p>
+                      <p className="font-semibold text-gray-900">{profileData.regimeTributario || '-'}</p>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-600 mb-1">Inscrição Municipal</p>
-                      <p className="font-medium text-gray-900">{profileData.inscricaoMunicipal}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600 mb-1">Regime Tributário</p>
-                      <p className="font-medium text-gray-900">{profileData.regimeTributario}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600 mb-1">CNAE Principal</p>
-                      {(profileData.cnaes || []).map((cnae, index) => (
-                        <p key={index} className="font-medium text-gray-900">{cnae}</p>
-                      ))}
+                    <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">CNAE Principal</p>
+                      {(profileData.cnaes || []).length > 0
+                        ? profileData.cnaes.map((cnae, index) => (
+                            <p key={index} className="font-semibold text-gray-900">{cnae}</p>
+                          ))
+                        : <p className="font-semibold text-gray-900">-</p>
+                      }
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               {/* Contato */}
-              <Card className="border-none shadow-md">
-                <CardHeader className="bg-purple-50 border-b">
-                  <CardTitle>Contato</CardTitle>
+              <Card className="border-none shadow-lg overflow-hidden">
+                <div className="h-1 bg-gradient-to-r from-blue-500 to-blue-400"></div>
+                <CardHeader className="border-b border-gray-100">
+                  <CardTitle className="text-lg flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                      <Phone className="w-5 h-5 text-blue-500" />
+                    </div>
+                    Contato
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-6">
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <p className="text-sm text-gray-600 mb-1">Email</p>
-                      <p className="font-medium text-gray-900">{profileData.email}</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Email</p>
+                      <p className="font-semibold text-gray-900">{profileData.email || '-'}</p>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-600 mb-1">Telefone</p>
-                      <p className="font-medium text-gray-900">{profileData.telefone}</p>
+                    <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Telefone</p>
+                      <p className="font-semibold text-gray-900">{profileData.telefone || '-'}</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               {/* Endereço */}
-              <Card className="border-none shadow-md">
-                <CardHeader className="bg-purple-50 border-b">
-                  <CardTitle>Endereço</CardTitle>
+              <Card className="border-none shadow-lg overflow-hidden">
+                <div className="h-1 bg-gradient-to-r from-green-500 to-emerald-400"></div>
+                <CardHeader className="border-b border-gray-100">
+                  <CardTitle className="text-lg flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-green-500/10 flex items-center justify-center">
+                      <MapPin className="w-5 h-5 text-green-500" />
+                    </div>
+                    Endereço
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-6">
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <p className="text-sm text-gray-600 mb-1">CEP</p>
-                      <p className="font-medium text-gray-900">{profileData.cep}</p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">CEP</p>
+                      <p className="font-semibold text-gray-900">{profileData.cep || '-'}</p>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-600 mb-1">Logradouro</p>
-                      <p className="font-medium text-gray-900">{profileData.logradouro}</p>
+                    <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100 md:col-span-2">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Logradouro</p>
+                      <p className="font-semibold text-gray-900">{profileData.logradouro || '-'}{profileData.numero ? `, ${profileData.numero}` : ''}</p>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-600 mb-1">Número</p>
-                      <p className="font-medium text-gray-900">{profileData.numero}</p>
+                    <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Complemento</p>
+                      <p className="font-semibold text-gray-900">{profileData.complemento || '-'}</p>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-600 mb-1">Complemento</p>
-                      <p className="font-medium text-gray-900">{profileData.complemento}</p>
+                    <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Bairro</p>
+                      <p className="font-semibold text-gray-900">{profileData.bairro || '-'}</p>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-600 mb-1">Bairro</p>
-                      <p className="font-medium text-gray-900">{profileData.bairro}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-600 mb-1">Município</p>
-                      <p className="font-medium text-gray-900">{profileData.municipio} - {profileData.estado}</p>
+                    <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Município / UF</p>
+                      <p className="font-semibold text-gray-900">{profileData.municipio || '-'}{profileData.estado ? ` - ${profileData.estado}` : ''}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -372,8 +401,9 @@ export default function PerfilPage() {
                   <div className="space-y-2">
                     <Label>Telefone</Label>
                     <Input
-                      value={profileData.telefone}
-                      onChange={(e) => setProfileData({ ...profileData, telefone: e.target.value })}
+                      value={formatPhone(profileData.telefone)}
+                      onChange={(e) => setProfileData({ ...profileData, telefone: extractPhoneDigits(e.target.value) })}
+                      placeholder="(00) 00000-0000"
                     />
                   </div>
                 </div>

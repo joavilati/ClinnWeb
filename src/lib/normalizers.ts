@@ -1,4 +1,4 @@
-import type { Client, Service, ClientAddress, DashboardData, DashboardMetric, NfseNote, NoteStatus } from '@/types'
+import type { Client, Service, ClientAddress, DashboardData, DashboardMetric, NfseNote, NoteStatus, License } from '@/types'
 
 /**
  * Normaliza a resposta de serviços do backend.
@@ -81,21 +81,37 @@ export function normalizeDashboard(raw: unknown): DashboardData {
   const data = (obj.data && typeof obj.data === 'object') ? obj.data as Record<string, unknown> : obj
 
   return {
-    notasEmitidas: normalizeMetric(data.notasEmitidas),
-    receitaTotal: normalizeMetric(data.receitaTotal),
-    notasCanceladas: normalizeMetric(data.notasCanceladas),
-    taxaSucesso: normalizeMetric(data.taxaSucesso),
+    notasEmitidas: buildMetric(data, 'notasEmitidas'),
+    receitaTotal: buildMetric(data, 'receitaTotal'),
+    notasCanceladas: buildMetric(data, 'notasCanceladas'),
+    taxaSucesso: buildMetric(data, 'taxaSucesso'),
     monthlyData: Array.isArray(data.monthlyData) ? data.monthlyData : [],
     recentNotes: Array.isArray(data.recentNotes) ? data.recentNotes : [],
   }
 }
 
-function normalizeMetric(val: unknown): DashboardMetric {
-  if (!val || typeof val !== 'object') return { value: 0, change: 0 }
-  const m = val as Record<string, unknown>
+/**
+ * Constrói uma métrica a partir da resposta do backend.
+ * Backend pode retornar:
+ *   - Objeto: { value: 10, change: 5 }
+ *   - Campos planos: notasEmitidas: 10, notasEmitidasChange: 100
+ */
+function buildMetric(data: Record<string, unknown>, key: string): DashboardMetric {
+  const val = data[key]
+
+  // Formato objeto: { value, change }
+  if (val && typeof val === 'object') {
+    const m = val as Record<string, unknown>
+    return {
+      value: (m.value as number | string) ?? 0,
+      change: Number(m.change ?? 0),
+    }
+  }
+
+  // Formato plano: key = valor, keyChange = variação
   return {
-    value: (m.value as number | string) ?? 0,
-    change: Number(m.change ?? 0),
+    value: (val as number | string) ?? 0,
+    change: Number(data[`${key}Change`] ?? 0),
   }
 }
 
@@ -128,13 +144,57 @@ export function normalizeNotes(raw: unknown): NfseNote[] {
       valorServico: Number(n.valorServico || 0),
       valorLiquido: Number(n.valorLiquido || 0),
       clientName: String(n.clientName || ''),
-      clientDocument: String(n.clientDocument || ''),
+      clientDocument: String(n.clientCpfCnpj || n.clientDocument || ''),
       serviceId: String(n.serviceId || ''),
       serviceDescription: String(n.serviceDescription || ''),
-      status: (n.status as NoteStatus) || 'pendente',
-      createdAt: String(n.createdAt || ''),
-      updatedAt: n.updatedAt ? String(n.updatedAt) : undefined,
-      canceladoAt: n.canceladoAt ? String(n.canceladoAt) : undefined,
+      status: mapNoteStatus(n.status),
+      createdAt: toISOString(n.createdAt),
+      updatedAt: n.updatedAt ? toISOString(n.updatedAt) : undefined,
+      canceladoAt: n.canceladoAt ? toISOString(n.canceladoAt) : undefined,
     }
   })
+}
+
+/**
+ * Converte timestamp numérico ou string para ISO string.
+ */
+function toISOString(val: unknown): string {
+  if (typeof val === 'number') return new Date(val).toISOString()
+  if (typeof val === 'string' && /^\d+$/.test(val)) return new Date(parseInt(val, 10)).toISOString()
+  return String(val || '')
+}
+
+/**
+ * Mapeia status do backend para status da UI.
+ * Backend: AUTORIZADA, CANCELADA, FALHA_EMISSAO
+ * UI: emitida, cancelada, pendente
+ */
+function mapNoteStatus(raw: unknown): NoteStatus {
+  const s = String(raw || '').toUpperCase()
+  switch (s) {
+    case 'AUTORIZADA': return 'emitida'
+    case 'CANCELADA': return 'cancelada'
+    case 'FALHA_EMISSAO': return 'pendente'
+    default: return 'pendente'
+  }
+}
+
+/**
+ * Normaliza a resposta de licença.
+ * Backend pode retornar: { data: {...} } ou {...} direto
+ */
+export function normalizeLicense(raw: unknown): License {
+  if (!raw || typeof raw !== 'object') return { type: 'trial', status: 'unknown' }
+  const obj = raw as Record<string, unknown>
+  const data = (obj.data && typeof obj.data === 'object') ? obj.data as Record<string, unknown> : obj
+  return {
+    id: data.id ? String(data.id) : undefined,
+    type: String(data.type || 'trial'),
+    status: String(data.status || 'unknown'),
+    startDate: data.startDate ? Number(data.startDate) : undefined,
+    endDate: data.endDate ? Number(data.endDate) : undefined,
+    features: Array.isArray(data.features) ? data.features : undefined,
+    createdAt: data.createdAt ? Number(data.createdAt) : undefined,
+    updatedAt: data.updatedAt ? Number(data.updatedAt) : undefined,
+  }
 }

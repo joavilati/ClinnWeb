@@ -76,3 +76,23 @@ export function numberToPercentDigits(value: number): string {
   if (!value) return ''
   return Math.round(value * 100).toString()
 }
+
+/**
+ * Formata telefone brasileiro.
+ * (XX) XXXXX-XXXX para celular (11 dígitos)
+ * (XX) XXXX-XXXX para fixo (10 dígitos)
+ */
+export function formatPhone(value: string): string {
+  const digits = value.replace(/\D/g, '')
+  if (digits.length <= 2) return digits
+  if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`
+  if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`
+}
+
+/**
+ * Extrai apenas dígitos de um telefone (para armazenar).
+ */
+export function extractPhoneDigits(value: string): string {
+  return value.replace(/\D/g, '').slice(0, 11)
+}

@@ -49,6 +49,7 @@ export default function ServicosPage() {
   const [showModal, setShowModal] = useState(false)
   const [editingService, setEditingService] = useState<ServiceItem | null>(null)
   const [loadingSave, setLoadingSave] = useState(false)
+  const [reloading, setReloading] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     code: '',
@@ -178,7 +179,7 @@ export default function ServicosPage() {
                 <p className="text-gray-600 mt-2">Gerencie os serviços cadastrados</p>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={reload} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors" title="Recarregar"><RefreshCw className="w-5 h-5" /></button>
+                <button onClick={async () => { setReloading(true); await reload(); setReloading(false); toast.success('Dados atualizados') }} disabled={reloading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
                 <Button
                   onClick={() => handleOpenModal()}
                   className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white"

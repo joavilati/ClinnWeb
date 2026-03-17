@@ -29,6 +29,7 @@ export default function SerieNumeracaoPage() {
   const [numeroInicial, setNumeroInicial] = useState('1')
   const [sequenciaAutomatica, setSequenciaAutomatica] = useState(true)
   const [loading, setLoading] = useState(false)
+  const [reloading, setReloading] = useState(false)
 
   const normalizeNfseControl = useCallback((raw: unknown): NfseControlData => {
     const obj = (raw && typeof raw === 'object') ? raw as Record<string, unknown> : {}
@@ -53,6 +54,13 @@ export default function SerieNumeracaoPage() {
       setSequenciaAutomatica(cachedData.sequenciaAutomatica)
     }
   }, [cachedData])
+
+  const handleReload = async () => {
+    setReloading(true)
+    await reload()
+    setReloading(false)
+    toast.success('Dados atualizados')
+  }
 
   const handleSave = async () => {
     setLoading(true)
@@ -96,7 +104,7 @@ export default function SerieNumeracaoPage() {
                   Voltar
                 </Button>
               </Link>
-              <button onClick={reload} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors" title="Recarregar"><RefreshCw className="w-5 h-5" /></button>
+              <button onClick={handleReload} disabled={reloading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
             </div>
             <h1 className="text-3xl font-bold text-gray-900">Série e Numeração (NFS-e)</h1>
             <p className="text-gray-600 mt-2">Configure a série e sequência das notas fiscais</p>

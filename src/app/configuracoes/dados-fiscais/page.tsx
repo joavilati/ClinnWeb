@@ -88,6 +88,7 @@ export default function DadosFiscaisPage() {
   const [exigibilidadeISS, setExigibilidadeISS] = useState('exigivel')
   const [simplesNacional, setSimplesNacional] = useState(true)
   const [loading, setLoading] = useState(false)
+  const [reloading, setReloading] = useState(false)
 
   const normalizeTaxConfig = useCallback((raw: unknown): TaxConfigData => {
     const obj = (raw && typeof raw === 'object') ? raw as Record<string, unknown> : {}
@@ -112,6 +113,13 @@ export default function DadosFiscaisPage() {
       setSimplesNacional(cachedData.simplesNacional)
     }
   }, [cachedData])
+
+  const handleReload = async () => {
+    setReloading(true)
+    await reload()
+    setReloading(false)
+    toast.success('Dados atualizados')
+  }
 
   const handleSave = async () => {
     setLoading(true)
@@ -148,7 +156,7 @@ export default function DadosFiscaisPage() {
                   Voltar
                 </Button>
               </Link>
-              <button onClick={reload} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors" title="Recarregar"><RefreshCw className="w-5 h-5" /></button>
+              <button onClick={handleReload} disabled={reloading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
             </div>
             <h1 className="text-3xl font-bold text-gray-900">Dados Fiscais</h1>
             <p className="text-gray-600 mt-2">Configure as informações fiscais da empresa</p>

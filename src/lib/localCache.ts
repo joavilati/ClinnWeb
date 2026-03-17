@@ -54,4 +54,5 @@ export const CACHE_KEYS = {
   NFSE_CONTROL: 'nfse_control',
   DASHBOARD: 'dashboard',
   NOTES: 'notes',
+  LICENSE: 'license',
 } as const

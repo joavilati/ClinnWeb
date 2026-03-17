@@ -88,6 +88,8 @@ export default function NovaNotaPage() {
   }, [])
 
   // ---------- State ----------
+  const [reloadingClients, setReloadingClients] = useState(false)
+  const [reloadingServices, setReloadingServices] = useState(false)
   const [step, setStep] = useState<'clients' | 'service' | 'review'>('clients')
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
   const [selectedClientIndex, setSelectedClientIndex] = useState<number>(0)
@@ -336,7 +338,7 @@ export default function NovaNotaPage() {
                       Escolha ou cadastre um novo cliente
                     </p>
                   </div>
-                  <button onClick={reloadClients} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors" title="Recarregar clientes"><RefreshCw className="w-5 h-5" /></button>
+                  <button onClick={async () => { setReloadingClients(true); await reloadClients(); setReloadingClients(false); toast.success('Clientes atualizados') }} disabled={reloadingClients} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar clientes"><RefreshCw className={`w-5 h-5 ${reloadingClients ? 'animate-spin' : ''}`} /></button>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4 pt-6">
@@ -724,7 +726,7 @@ export default function NovaNotaPage() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-1">
                   <h3 className="text-lg font-bold text-gray-900">Serviço</h3>
-                  <button onClick={reloadServices} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors" title="Recarregar serviços"><RefreshCw className="w-4 h-4" /></button>
+                  <button onClick={async () => { setReloadingServices(true); await reloadServices(); setReloadingServices(false); toast.success('Serviços atualizados') }} disabled={reloadingServices} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar serviços"><RefreshCw className={`w-4 h-4 ${reloadingServices ? 'animate-spin' : ''}`} /></button>
                 </div>
                 <p className="text-sm text-gray-500 mb-4">Selecione o serviço prestado</p>
 

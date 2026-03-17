@@ -4,11 +4,13 @@ import { useState, useEffect } from 'react'
 import DashboardLayout from '@/components/DashboardLayout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Check, CheckCircle, CreditCard, HeadphonesIcon, Loader2, Clock } from 'lucide-react'
+import { Check, CheckCircle, CreditCard, HeadphonesIcon, Loader2, Clock, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
-import useSWR from 'swr'
 import { useApiClient } from '@/hooks/useApiClient'
+import { useCachedData } from '@/hooks/useCachedData'
 import { saveLicenseEndDate, saveLicenseStatus } from '@/lib/licenseGuard'
+import { normalizeLicense } from '@/lib/normalizers'
+import { CACHE_KEYS } from '@/lib/localCache'
 import type { License } from '@/types'
 
 const monthlyFeatures = [
@@ -46,19 +48,15 @@ function formatLicenseStatus(status: string): string {
 export default function PagamentosPage() {
   const { apiFetch } = useApiClient()
   const [subscribingPlan, setSubscribingPlan] = useState<string | null>(null)
+  const [reloading, setReloading] = useState(false)
 
-  const { data: rawLicense, mutate } = useSWR(
-    '/api/license',
-    async (url: string) => {
-      const res = await apiFetch(url)
-      if (!res.ok) return null
-      return res.json()
-    }
-  )
+  const { data: license, reload } = useCachedData<License>({
+    cacheKey: CACHE_KEYS.LICENSE,
+    apiUrl: '/api/license',
+    normalize: normalizeLicense,
+  })
 
-  const license: License | null = rawLicense?.data ?? rawLicense
-
-  // Atualiza cache da licença sempre que os dados são carregados
+  // Atualiza cache do licenseGuard sempre que os dados são carregados
   useEffect(() => {
     if (license?.status) {
       saveLicenseStatus(license.status)
@@ -79,7 +77,7 @@ export default function PagamentosPage() {
         const err = await res.json().catch(() => ({}))
         throw new Error(err.message || 'Erro ao assinar plano')
       }
-      await mutate()
+      await reload()
       toast.success('Plano assinado com sucesso!')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Erro ao assinar plano'
@@ -99,8 +97,9 @@ export default function PagamentosPage() {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/20 to-gray-50 p-8">
         <div className="max-w-5xl mx-auto">
           {/* Header */}
-          <div className="mb-8">
+          <div className="mb-8 flex items-center gap-3">
             <h1 className="text-3xl font-bold text-gray-900">Planos</h1>
+            <button onClick={async () => { setReloading(true); await reload(); setReloading(false); toast.success('Dados atualizados') }} disabled={reloading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
           </div>
 
           {/* Current License Card */}

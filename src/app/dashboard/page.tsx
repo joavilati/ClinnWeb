@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import DashboardLayout from '@/components/DashboardLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { FileText, DollarSign, XCircle, CheckCircle, TrendingUp, ArrowUpRight, RefreshCw } from 'lucide-react'
@@ -7,6 +8,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useCachedData } from '@/hooks/useCachedData'
 import { normalizeDashboard } from '@/lib/normalizers'
 import { CACHE_KEYS } from '@/lib/localCache'
+import { toast } from 'sonner'
 import type { DashboardData, DashboardMetric } from '@/types'
 
 function formatCurrency(value: number | string | undefined | null): string {
@@ -70,6 +72,7 @@ function RecentNoteSkeleton() {
 }
 
 export default function DashboardPage() {
+  const [reloading, setReloading] = useState(false)
   const { data, error, isLoading, reload } = useCachedData<DashboardData>({
     cacheKey: CACHE_KEYS.DASHBOARD,
     apiUrl: '/api/dashboard',
@@ -122,7 +125,7 @@ export default function DashboardPage() {
               <div className="py-6">
                 <div className="flex items-center gap-3 mb-2">
                   <h1 className="text-4xl font-bold text-gray-900">Dashboard</h1>
-                  <button onClick={reload} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors" title="Recarregar"><RefreshCw className="w-5 h-5" /></button>
+                  <button onClick={async () => { setReloading(true); await reload(); setReloading(false); toast.success('Dados atualizados') }} disabled={reloading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
                 </div>
                 <p className="text-gray-600 flex items-center gap-2">
                   <span>Visão geral do seu negócio</span>
@@ -227,7 +230,7 @@ export default function DashboardPage() {
                           />
                           <Line
                             type="monotone"
-                            dataKey="value"
+                            dataKey="revenue"
                             stroke="#7C3AED"
                             strokeWidth={3}
                             fill="url(#colorValue)"
@@ -275,7 +278,7 @@ export default function DashboardPage() {
                             boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
                           }}
                         />
-                        <Bar dataKey="notas" fill="#7C3AED" radius={[8, 8, 0, 0]} />
+                        <Bar dataKey="value" fill="#7C3AED" radius={[8, 8, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
