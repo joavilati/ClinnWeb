@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(cd:*)",
+      "Bash(ls:*)",
+      "Bash(npx tsc:*)",
+      "Bash(xargs cat:*)"
+    ]
+  }
+}
