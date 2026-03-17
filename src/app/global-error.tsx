@@ -1,5 +1,8 @@
 'use client'
 
+import * as Sentry from "@sentry/nextjs";
+import { useEffect } from "react";
+
 export default function GlobalError({
   error,
   reset,
@@ -7,6 +10,15 @@ export default function GlobalError({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  useEffect(() => {
+    Sentry.captureException(error, {
+      tags: {
+        error_boundary: "global",
+        digest: error.digest,
+      },
+    });
+  }, [error]);
+
   return (
     <html lang="pt-BR">
       <body className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -18,7 +30,7 @@ export default function GlobalError({
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Algo deu errado</h2>
           <p className="text-gray-600 mb-6">
-            Ocorreu um erro inesperado. Tente novamente ou entre em contato com o suporte.
+            Ocorreu um erro inesperado. Nossa equipe foi notificada.
           </p>
           {error.digest && (
             <p className="text-xs text-gray-400 mb-4">Código: {error.digest}</p>
