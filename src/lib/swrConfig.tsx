@@ -20,8 +20,10 @@ export function SWRProvider({ children }: SWRProviderProps) {
         dedupingInterval: 5000,
         keepPreviousData: true,
         errorRetryCount: 3,
-        onError: (error, key) => {
-          console.error('SWR Error:', error, 'Key:', key)
+        onError: (error) => {
+          if (typeof window !== 'undefined' && 'Sentry' in window) {
+            import('@sentry/nextjs').then((Sentry) => Sentry.captureException(error))
+          }
         },
       }}
     >

@@ -59,8 +59,7 @@ export default function AlterarSenhaPage() {
         const data = await response.json().catch(() => null)
         toast.error(data?.message || 'Erro ao alterar senha')
       }
-    } catch (error) {
-      console.error('Erro ao alterar senha:', error)
+    } catch {
       toast.error('Erro ao alterar senha')
     } finally {
       setLoading(false)

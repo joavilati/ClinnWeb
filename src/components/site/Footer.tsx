@@ -15,7 +15,7 @@ export function Footer() {
 
           {/* Links and copyright */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-gray-500">
-            <span>&copy; 2025 ClinNota. Todos os direitos reservados.</span>
+            <span>&copy; {new Date().getFullYear()} ClinNota. Todos os direitos reservados.</span>
             <div className="hidden sm:block w-px h-4 bg-gray-300" />
             <div className="flex items-center gap-4">
               <a

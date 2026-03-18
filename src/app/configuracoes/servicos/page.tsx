@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ArrowLeft, Plus, Pencil, Trash2, RefreshCw } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useApiClient } from '@/hooks/useApiClient'
 import { useCachedData } from '@/hooks/useCachedData'
@@ -44,7 +43,6 @@ function normalizeServiceList(raw: unknown): ServiceItem[] {
 }
 
 export default function ServicosPage() {
-  const router = useRouter()
   const { apiFetch } = useApiClient()
   const [showModal, setShowModal] = useState(false)
   const [editingService, setEditingService] = useState<ServiceItem | null>(null)
@@ -133,8 +131,7 @@ export default function ServicosPage() {
         }
       }
       handleCloseModal()
-    } catch (error) {
-      console.error('Erro ao salvar serviço:', error)
+    } catch {
       toast.error('Erro ao salvar serviço')
     } finally {
       setLoadingSave(false)
@@ -153,8 +150,7 @@ export default function ServicosPage() {
       } else {
         toast.error('Erro ao remover serviço')
       }
-    } catch (error) {
-      console.error('Erro ao remover serviço:', error)
+    } catch {
       toast.error('Erro ao remover serviço')
     }
   }
@@ -179,7 +175,7 @@ export default function ServicosPage() {
                 <p className="text-gray-600 mt-2">Gerencie os serviços cadastrados</p>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={async () => { setReloading(true); await reload(); setReloading(false); toast.success('Dados atualizados') }} disabled={reloading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
+                <button onClick={async () => { setReloading(true); await reload(); setReloading(false); toast.success('Dados atualizados') }} disabled={reloading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar" aria-label="Recarregar dados"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
                 <Button
                   onClick={() => handleOpenModal()}
                   className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white"

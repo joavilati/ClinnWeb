@@ -1,7 +1,8 @@
-import { proxyToBackend } from '@/lib/api-proxy'
+import { proxyToBackend, safeJsonParse } from '@/lib/api-proxy'
 
 export async function POST(request: Request) {
-  const body = await request.json()
+  const { data: body, error } = await safeJsonParse(request)
+  if (error) return error
   return proxyToBackend(request, {
     endpoint: '/v1/nfse/duplicate',
     method: 'POST',

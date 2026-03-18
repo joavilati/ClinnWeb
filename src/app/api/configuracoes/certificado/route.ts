@@ -1,9 +1,10 @@
-import { proxyToBackend } from '@/lib/api-proxy'
+import { proxyToBackend, safeFormDataParse } from '@/lib/api-proxy'
 
 export async function POST(request: Request) {
-  const formData = await request.formData()
+  const { data: formData, error } = await safeFormDataParse(request)
+  if (error) return error
   return proxyToBackend(request, {
-    endpoint: '/v1/certificado-digital',
+    endpoint: '/v1/certificado-digital/multipart',
     method: 'POST',
     body: formData,
   })

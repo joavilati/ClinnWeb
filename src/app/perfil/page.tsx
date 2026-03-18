@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
 import DashboardLayout from '@/components/DashboardLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -14,37 +13,11 @@ import { formatPhone, extractPhoneDigits, formatCnpj, extractCnpjDigits, formatC
 import { useApiClient } from '@/hooks/useApiClient'
 import { useCachedData } from '@/hooks/useCachedData'
 import { CACHE_KEYS } from '@/lib/localCache'
+import { ESTADOS, toUF } from '@/lib/constants'
 import type { ProfileData } from '@/types'
 import { MunicipioAutocomplete } from '@/components/MunicipioAutocomplete'
 
-const estados = [
-  'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG',
-  'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'
-]
-
-const ufByName: Record<string, string> = {
-  'ACRE': 'AC', 'ALAGOAS': 'AL', 'AMAPÁ': 'AP', 'AMAPA': 'AP', 'AMAZONAS': 'AM',
-  'BAHIA': 'BA', 'CEARÁ': 'CE', 'CEARA': 'CE', 'DISTRITO FEDERAL': 'DF',
-  'ESPÍRITO SANTO': 'ES', 'ESPIRITO SANTO': 'ES', 'GOIÁS': 'GO', 'GOIAS': 'GO',
-  'MARANHÃO': 'MA', 'MARANHAO': 'MA', 'MATO GROSSO': 'MT', 'MATO GROSSO DO SUL': 'MS',
-  'MINAS GERAIS': 'MG', 'PARÁ': 'PA', 'PARA': 'PA', 'PARAÍBA': 'PB', 'PARAIBA': 'PB',
-  'PARANÁ': 'PR', 'PARANA': 'PR', 'PERNAMBUCO': 'PE', 'PIAUÍ': 'PI', 'PIAUI': 'PI',
-  'RIO DE JANEIRO': 'RJ', 'RIO GRANDE DO NORTE': 'RN', 'RIO GRANDE DO SUL': 'RS',
-  'RONDÔNIA': 'RO', 'RONDONIA': 'RO', 'RORAIMA': 'RR', 'SANTA CATARINA': 'SC',
-  'SÃO PAULO': 'SP', 'SAO PAULO': 'SP', 'SERGIPE': 'SE', 'TOCANTINS': 'TO',
-}
-
-function toUF(value: string): string {
-  if (!value) return ''
-  const upper = value.toUpperCase().trim()
-  // Já é sigla (2 letras)
-  if (upper.length === 2 && estados.includes(upper)) return upper
-  // Nome completo → sigla
-  return ufByName[upper] || value
-}
-
 export default function PerfilPage() {
-  const router = useRouter()
   const { apiFetch } = useApiClient()
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -110,6 +83,7 @@ export default function PerfilPage() {
   const handleSave = async () => {
     setIsSaving(true)
     try {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { cnaes, estado, municipio, ...rest } = profileData
       const payload = { ...rest, uf: estado, cidade: municipio }
       const res = await apiFetch('/api/profile', {
@@ -179,7 +153,7 @@ export default function PerfilPage() {
                   <div>
                     <div className="flex items-center gap-3 mb-2">
                       <h1 className="text-4xl font-bold text-gray-900">Perfil da Empresa</h1>
-                      <button onClick={async () => { setReloading(true); await reload(); setReloading(false); toast.success('Dados atualizados') }} disabled={reloading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
+                      <button onClick={async () => { setReloading(true); await reload(); setReloading(false); toast.success('Dados atualizados') }} disabled={reloading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar" aria-label="Recarregar dados"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
                     </div>
                     <p className="text-gray-600">Informações cadastrais da sua empresa</p>
                   </div>
@@ -451,7 +425,7 @@ export default function PerfilPage() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {estados.map((estado) => (
+                        {ESTADOS.map((estado) => (
                           <SelectItem key={estado} value={estado}>{estado}</SelectItem>
                         ))}
                       </SelectContent>

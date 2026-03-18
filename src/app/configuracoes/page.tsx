@@ -1,6 +1,5 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import DashboardLayout from '@/components/DashboardLayout'
 import { Card, CardContent } from '@/components/ui/card'
@@ -45,8 +44,6 @@ const settingsOptions = [
 ]
 
 export default function ConfiguracoesPage() {
-  const router = useRouter()
-
   return (
     <DashboardLayout>
       <div className="p-8">

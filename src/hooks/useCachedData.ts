@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { getCached, setCache, CACHE_KEYS } from '@/lib/localCache'
+import { getCached, setCache } from '@/lib/localCache'
 import { useApiClient } from '@/hooks/useApiClient'
 
 interface UseCachedDataOptions<T> {
@@ -55,7 +55,8 @@ export function useCachedData<T>({
     }
     // Se não tem cache, busca da API
     fetchFromApi()
-  }, [cacheKey])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchFromApi muda a cada render; cacheKey e persistent são suficientes
+  }, [cacheKey, persistent])
 
   const fetchFromApi = useCallback(async () => {
     setIsLoading(true)

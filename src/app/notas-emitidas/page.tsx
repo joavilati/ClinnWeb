@@ -30,6 +30,7 @@ import { normalizeNotes } from '@/lib/normalizers'
 import { CACHE_KEYS, removeCache } from '@/lib/localCache'
 import { isLicenseActive } from '@/lib/licenseGuard'
 import { LicenseExpiredModal } from '@/components/LicenseExpiredModal'
+import { MESES } from '@/lib/constants'
 import type { NfseNote, NoteStatus } from '@/types'
 
 const statusConfig: Record<NoteStatus, { label: string; className: string }> = {
@@ -186,7 +187,7 @@ export default function NotasEmitidasPage() {
             <div className="py-6">
               <div className="flex items-center gap-3 mb-2">
                 <h1 className="text-4xl font-bold text-gray-900">Notas Emitidas</h1>
-                <button onClick={async () => { setReloading(true); await reload(); setReloading(false); toast.success('Dados atualizados') }} disabled={reloading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
+                <button onClick={async () => { setReloading(true); await reload(); setReloading(false); toast.success('Dados atualizados') }} disabled={reloading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar" aria-label="Recarregar dados"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
               </div>
               <p className="text-gray-600">Gerencie e acompanhe todas as suas notas fiscais</p>
             </div>
@@ -220,18 +221,9 @@ export default function NotasEmitidasPage() {
                     <SelectValue placeholder="Mês" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="01">Janeiro</SelectItem>
-                    <SelectItem value="02">Fevereiro</SelectItem>
-                    <SelectItem value="03">Março</SelectItem>
-                    <SelectItem value="04">Abril</SelectItem>
-                    <SelectItem value="05">Maio</SelectItem>
-                    <SelectItem value="06">Junho</SelectItem>
-                    <SelectItem value="07">Julho</SelectItem>
-                    <SelectItem value="08">Agosto</SelectItem>
-                    <SelectItem value="09">Setembro</SelectItem>
-                    <SelectItem value="10">Outubro</SelectItem>
-                    <SelectItem value="11">Novembro</SelectItem>
-                    <SelectItem value="12">Dezembro</SelectItem>
+                    {MESES.map((m) => (
+                      <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <Select value={selectedYear} onValueChange={setSelectedYear}>

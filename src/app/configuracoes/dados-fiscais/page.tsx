@@ -136,8 +136,7 @@ export default function DadosFiscaisPage() {
       } else {
         toast.error('Erro ao salvar dados fiscais')
       }
-    } catch (error) {
-      console.error('Erro ao salvar dados fiscais:', error)
+    } catch {
       toast.error('Erro ao salvar dados fiscais')
     } finally {
       setLoading(false)
@@ -156,7 +155,7 @@ export default function DadosFiscaisPage() {
                   Voltar
                 </Button>
               </Link>
-              <button onClick={handleReload} disabled={reloading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
+              <button onClick={handleReload} disabled={reloading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar" aria-label="Recarregar dados"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
             </div>
             <h1 className="text-3xl font-bold text-gray-900">Dados Fiscais</h1>
             <p className="text-gray-600 mt-2">Configure as informações fiscais da empresa</p>

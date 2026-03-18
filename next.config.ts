@@ -30,9 +30,11 @@ export default withSentryConfig(nextConfig, {
 
   widenClientFileUpload: false,
 
-  autoInstrumentServerFunctions: true,
-  autoInstrumentMiddleware: true,
-  autoInstrumentAppDirectory: true,
+  webpack: {
+    autoInstrumentServerFunctions: true,
+    autoInstrumentMiddleware: true,
+    autoInstrumentAppDirectory: true,
+  },
 
   telemetry: false,
 });

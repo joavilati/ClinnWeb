@@ -1,10 +1,10 @@
-import { getCachedToken, invalidateTokenCache } from '@/lib/tokenCache'
 import {
   isLicenseExpired,
   isSkippedEndpoint,
   saveLicenseEndDate,
   saveLicenseStatus,
 } from '@/lib/licenseGuard'
+import { clearSession } from '@/lib/tokenCache'
 
 /**
  * Promise compartilhada para evitar múltiplas verificações simultâneas de licença.
@@ -13,17 +13,14 @@ let licenseCheckPromise: Promise<void> | null = null
 
 /**
  * Verifica licença no servidor e atualiza o cache local.
- * NÃO bloqueia — apenas salva o status para consulta pelas telas.
  */
-async function refreshLicenseStatus(authHeader?: string): Promise<void> {
+async function refreshLicenseStatus(): Promise<void> {
   if (licenseCheckPromise) return licenseCheckPromise
 
   licenseCheckPromise = (async () => {
     try {
-      const headers: Record<string, string> = {}
-      if (authHeader) headers['Authorization'] = authHeader
-
-      const res = await fetch('/api/license', { headers })
+      // Cookie httpOnly é enviado automaticamente pelo browser
+      const res = await fetch('/api/license')
       if (!res.ok) return
 
       const body = await res.json()
@@ -49,20 +46,16 @@ async function refreshLicenseStatus(authHeader?: string): Promise<void> {
 /**
  * Hook para fazer chamadas de API autenticadas.
  *
- * O interceptor verifica a licença e ATUALIZA o status em cache,
- * mas NÃO bloqueia requisições nem redireciona.
- * O bloqueio é feito apenas nas telas: Nova Nota, Duplicar, Cancelar.
+ * Com httpOnly cookies, o token é enviado automaticamente pelo browser.
+ * O hook agora foca apenas em:
+ * - Content-Type management
+ * - License guard
+ * - 401/402 handling
  */
 export function useApiClient() {
   const apiFetch = async (url: string, options?: RequestInit) => {
     const headers: Record<string, string> = {
       ...(options?.headers as Record<string, string> || {})
-    }
-
-    // Anexa Authorization: Bearer <token>
-    const token = getCachedToken()
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`
     }
 
     // Ajusta Content-Type quando o body não é FormData
@@ -73,31 +66,23 @@ export function useApiClient() {
 
     // License guard: verifica e ATUALIZA status, mas NÃO bloqueia
     if (!isSkippedEndpoint(url) && isLicenseExpired()) {
-      await refreshLicenseStatus(headers['Authorization'])
+      await refreshLicenseStatus()
     }
 
-    const fetchWithHeaders = (finalHeaders: Record<string, string>) =>
-      fetch(url, {
-        ...options,
-        headers: finalHeaders
-      })
+    const response = await fetch(url, {
+      ...options,
+      headers,
+      // credentials: 'same-origin' é o default — cookies são enviados automaticamente
+    })
 
-    let response = await fetchWithHeaders(headers)
-
-    // Revalida token em caso de 401
-    if (response.status === 401) {
-      invalidateTokenCache()
-      const retryToken = getCachedToken()
-      if (retryToken) {
-        const retryHeaders = {
-          ...headers,
-          Authorization: `Bearer ${retryToken}`
-        }
-        response = await fetchWithHeaders(retryHeaders)
+    // 401 = sessão expirada (cookie expirou ou token inválido)
+    if (response.status === 401 && !isSkippedEndpoint(url)) {
+      clearSession()
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login'
       }
     }
 
-    // 402 do backend: apenas atualiza status, NÃO redireciona
     if (response.status === 402) {
       saveLicenseStatus('expired')
     }

@@ -1,5 +1,35 @@
 import { NextResponse } from 'next/server'
 
+const APP_VERSION = process.env.npm_package_version || '1.0.0'
+const AUTH_COOKIE = 'auth_token'
+const COOKIE_MAX_AGE = 24 * 60 * 60 // 24h em segundos
+
+/**
+ * Define o cookie httpOnly com o token JWT na resposta.
+ */
+export function setAuthCookie(response: NextResponse, token: string): void {
+  response.cookies.set(AUTH_COOKIE, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: COOKIE_MAX_AGE,
+  })
+}
+
+/**
+ * Remove o cookie httpOnly de autenticação.
+ */
+export function clearAuthCookie(response: NextResponse): void {
+  response.cookies.set(AUTH_COOKIE, '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: 0,
+  })
+}
+
 function generateRequestId(): string {
   return crypto.randomUUID()
 }
@@ -15,6 +45,38 @@ export interface ProxyOptions {
 }
 
 /**
+ * Retorna uma resposta de erro padronizada.
+ * Formato: { error: string, code?: string }
+ */
+function errorResponse(error: string, status: number, code?: string): Response {
+  return NextResponse.json({ error, ...(code ? { code } : {}) }, { status })
+}
+
+/**
+ * Faz parse seguro de request.json(), retornando erro 400 se inválido.
+ */
+export async function safeJsonParse(request: Request): Promise<{ data?: unknown; error?: Response }> {
+  try {
+    const data = await request.json()
+    return { data }
+  } catch {
+    return { error: errorResponse('Corpo da requisição inválido (JSON malformado)', 400, 'INVALID_JSON') }
+  }
+}
+
+/**
+ * Faz parse seguro de request.formData(), retornando erro 400 se inválido.
+ */
+export async function safeFormDataParse(request: Request): Promise<{ data?: FormData; error?: Response }> {
+  try {
+    const data = await request.formData()
+    return { data }
+  } catch {
+    return { error: errorResponse('Corpo da requisição inválido (FormData malformado)', 400, 'INVALID_FORM_DATA') }
+  }
+}
+
+/**
  * Proxy requests para o backend API do ClinNota
  */
 export async function proxyToBackend(
@@ -26,27 +88,26 @@ export async function proxyToBackend(
   try {
     const method = (options.method || 'GET').toUpperCase()
     if (options.allowedMethods && !options.allowedMethods.includes(method)) {
-      return NextResponse.json(
-        { message: 'Method not allowed' },
-        { status: 405 }
-      )
+      return errorResponse('Method not allowed', 405)
     }
 
     const apiBase = process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_URL
     if (!apiBase) {
-      return NextResponse.json(
-        { error: 'API base url not configured' },
-        { status: 500 }
-      )
+      return errorResponse('API base url not configured', 500, 'API_NOT_CONFIGURED')
     }
 
-    const authHeader = request.headers.get('authorization')
+    // Tenta Authorization header; se não tiver, lê do cookie httpOnly
+    let authHeader = request.headers.get('authorization')
+    if (!authHeader) {
+      const cookieHeader = request.headers.get('cookie') || ''
+      const match = cookieHeader.match(/auth_token=([^;]+)/)
+      if (match) {
+        authHeader = `Bearer ${match[1]}`
+      }
+    }
 
     if (options.requireAuth !== false && !authHeader) {
-      return NextResponse.json(
-        { message: 'Authorization header required' },
-        { status: 401 }
-      )
+      return errorResponse('Authorization header required', 401, 'AUTH_REQUIRED')
     }
 
     const upstreamUrl = new URL(options.endpoint, apiBase)
@@ -59,7 +120,7 @@ export async function proxyToBackend(
     const headers: HeadersInit = {
       Accept: 'application/json',
       'X-Platform': 'web',
-      'X-App-Version': '1.0.0',
+      'X-App-Version': APP_VERSION,
       'X-Request-Id': requestId,
     }
     if (authHeader) {
@@ -101,21 +162,17 @@ export async function proxyToBackend(
           return NextResponse.json(errorData, { status: res.status })
         } else {
           const errorText = await res.text()
-          return NextResponse.json(
-            {
-              message: errorText || `Erro ${res.status}: ${res.statusText}`,
-              code: `HTTP_${res.status}`
-            },
-            { status: res.status }
+          return errorResponse(
+            errorText || `Erro ${res.status}: ${res.statusText}`,
+            res.status,
+            `HTTP_${res.status}`
           )
         }
       } catch {
-        return NextResponse.json(
-          {
-            message: `Erro ao consultar ${options.endpoint} (${res.status} ${res.statusText})`,
-            code: 'PROXY_PARSE_ERROR'
-          },
-          { status: 502 }
+        return errorResponse(
+          `Erro ao consultar ${options.endpoint} (${res.status} ${res.statusText})`,
+          502,
+          'PROXY_PARSE_ERROR'
         )
       }
     }
@@ -137,9 +194,10 @@ export async function proxyToBackend(
     })
   } catch (err: unknown) {
     const error = err as Error
-    return NextResponse.json(
-      { error: 'Erro interno ao fazer proxy', detail: error?.message },
-      { status: error?.name === 'AbortError' ? 504 : 500 }
+    return errorResponse(
+      error?.message || 'Erro interno ao fazer proxy',
+      error?.name === 'AbortError' ? 504 : 500,
+      error?.name === 'AbortError' ? 'TIMEOUT' : 'INTERNAL_ERROR'
     )
   }
 }

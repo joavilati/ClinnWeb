@@ -44,8 +44,9 @@ export default function CertificadoPage() {
     setLoading(true)
     try {
       const formData = new FormData()
-      formData.append('certificado', selectedFile)
+      formData.append('file', selectedFile)
       formData.append('senha', encodePassword(password))
+      formData.append('name', selectedFile.name)
 
       const response = await apiFetch(`/api/configuracoes/certificado`, {
         method: 'POST',
@@ -58,8 +59,7 @@ export default function CertificadoPage() {
       } else {
         toast.error('Erro ao enviar certificado')
       }
-    } catch (error) {
-      console.error('Erro ao enviar certificado:', error)
+    } catch {
       toast.error('Erro ao enviar certificado')
     } finally {
       setLoading(false)
@@ -82,7 +82,7 @@ export default function CertificadoPage() {
             </Link>
             <div className="flex items-center gap-3">
               <h1 className="text-3xl font-bold text-gray-900">Upload de Certificado</h1>
-              <button onClick={() => window.location.reload()} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors" title="Recarregar"><RefreshCw className="w-5 h-5" /></button>
+              <button onClick={() => window.location.reload()} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors" title="Recarregar" aria-label="Recarregar dados"><RefreshCw className="w-5 h-5" /></button>
             </div>
             <p className="text-gray-600 mt-2">Faça upload do certificado digital da empresa</p>
           </div>

@@ -125,7 +125,7 @@ export default function DashboardPage() {
               <div className="py-6">
                 <div className="flex items-center gap-3 mb-2">
                   <h1 className="text-4xl font-bold text-gray-900">Dashboard</h1>
-                  <button onClick={async () => { setReloading(true); await reload(); setReloading(false); toast.success('Dados atualizados') }} disabled={reloading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
+                  <button onClick={async () => { setReloading(true); await reload(); setReloading(false); toast.success('Dados atualizados') }} disabled={reloading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar" aria-label="Recarregar dados"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
                 </div>
                 <p className="text-gray-600 flex items-center gap-2">
                   <span>Visão geral do seu negócio</span>

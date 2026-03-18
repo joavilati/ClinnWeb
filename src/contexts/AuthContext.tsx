@@ -1,10 +1,12 @@
 'use client'
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
-import { saveToken, clearTokenCache, getCachedToken } from '@/lib/tokenCache'
+import * as Sentry from '@sentry/nextjs'
+import { hasSession, clearSession } from '@/lib/tokenCache'
 import { encodePassword } from '@/lib/passwordEncoder'
 import { clearVolatileCache } from '@/lib/localCache'
 import { clearLicenseCache } from '@/lib/licenseGuard'
+import { STORAGE_KEYS } from '@/lib/constants'
 
 interface User {
   id: string
@@ -32,36 +34,16 @@ export function useAuth() {
 }
 
 /**
- * Extrai LoginResponse do corpo da resposta.
- * O backend pode retornar:
- *   { token, emissor }
- *   { data: { token, emissor } }
- *   { result: { token, emissor } }
+ * Extrai dados do emissor da resposta de login/registro.
+ * Suporta múltiplos formatos: { emissor }, { data: { emissor } }, { result: { emissor } }
  */
-function extractLoginData(body: Record<string, unknown>): { token: string; emissor?: Record<string, unknown> } | null {
-  // Direto: { token: "...", emissor: {...} }
-  if (typeof body.token === 'string') {
-    return { token: body.token, emissor: body.emissor as Record<string, unknown> | undefined }
-  }
-
-  // Envelope: { data: { token, emissor } }
-  const data = body.data as Record<string, unknown> | undefined
-  if (data && typeof data.token === 'string') {
-    return { token: data.token, emissor: data.emissor as Record<string, unknown> | undefined }
-  }
-
-  // Envelope: { result: { token, emissor } }
-  const result = body.result as Record<string, unknown> | undefined
-  if (result && typeof result.token === 'string') {
-    return { token: result.token, emissor: result.emissor as Record<string, unknown> | undefined }
-  }
-
-  // Fallback: procura accessToken
-  if (typeof body.accessToken === 'string') {
-    return { token: body.accessToken, emissor: body.emissor as Record<string, unknown> | undefined }
-  }
-
-  return null
+function extractEmissor(body: Record<string, unknown>): Record<string, unknown> {
+  const emissor =
+    (body.emissor as Record<string, unknown>) ||
+    ((body.data as Record<string, unknown>)?.emissor as Record<string, unknown>) ||
+    ((body.result as Record<string, unknown>)?.emissor as Record<string, unknown>) ||
+    {}
+  return emissor
 }
 
 interface AuthProviderProps {
@@ -72,32 +54,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Restaurar sessão ao carregar
+  // Restaurar sessão do localStorage ao carregar
   useEffect(() => {
-    const restoreSession = () => {
-      try {
-        const token = getCachedToken()
-        if (token) {
-          const userId = localStorage.getItem('user_id') || ''
-          const userCnpj = localStorage.getItem('user_cnpj') || ''
-          const userName = localStorage.getItem('user_name')
-          const userEmail = localStorage.getItem('user_email')
-
-          // Basta ter token para restaurar sessão
-          setUser({
-            id: userId,
-            cnpj: userCnpj,
-            name: userName || undefined,
-            email: userEmail || undefined,
-          })
-        }
-      } catch (e) {
-        console.error('Erro ao restaurar sessão:', e)
+    try {
+      if (hasSession()) {
+        setUser({
+          id: localStorage.getItem(STORAGE_KEYS.USER_ID) || '',
+          cnpj: localStorage.getItem(STORAGE_KEYS.USER_CNPJ) || '',
+          name: localStorage.getItem(STORAGE_KEYS.USER_NAME) || undefined,
+          email: localStorage.getItem(STORAGE_KEYS.USER_EMAIL) || undefined,
+        })
       }
-      setLoading(false)
+    } catch (e) {
+      Sentry.captureException(e)
     }
-
-    restoreSession()
+    setLoading(false)
   }, [])
 
   const signIn = useCallback(async (cnpj: string, password: string) => {
@@ -113,25 +84,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
       throw new Error(body?.message || body?.error || 'Erro ao fazer login')
     }
 
-    const loginData = extractLoginData(body)
-    if (!loginData) {
-      console.error('Resposta inesperada do login:', body)
-      throw new Error('Resposta inesperada do servidor')
-    }
-
-    const emissor = loginData.emissor || {}
+    // O token é salvo automaticamente como httpOnly cookie pelo servidor.
+    // Aqui salvamos apenas dados do usuário no localStorage.
+    const emissor = extractEmissor(body)
     const userId = (emissor.id as string) || ''
     const userName = (emissor.companyName as string) || (emissor.tradeName as string) || ''
     const userEmail = (emissor.email as string) || ''
 
-    // Salvar token
-    saveToken(loginData.token)
-
-    // Salvar dados do usuário no localStorage
-    localStorage.setItem('user_id', userId)
-    localStorage.setItem('user_cnpj', cnpj)
-    if (userName) localStorage.setItem('user_name', userName)
-    if (userEmail) localStorage.setItem('user_email', userEmail)
+    localStorage.setItem(STORAGE_KEYS.USER_ID, userId)
+    localStorage.setItem(STORAGE_KEYS.USER_CNPJ, cnpj)
+    if (userName) localStorage.setItem(STORAGE_KEYS.USER_NAME, userName)
+    if (userEmail) localStorage.setItem(STORAGE_KEYS.USER_EMAIL, userEmail)
 
     setUser({
       id: userId,
@@ -154,20 +117,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       throw new Error(body?.message || body?.error || 'Erro ao criar conta')
     }
 
-    const loginData = extractLoginData(body)
-    if (!loginData) {
-      console.error('Resposta inesperada do registro:', body)
-      throw new Error('Resposta inesperada do servidor')
-    }
-
-    const emissor = loginData.emissor || {}
+    const emissor = extractEmissor(body)
     const userId = (emissor.id as string) || ''
 
-    saveToken(loginData.token)
-
-    localStorage.setItem('user_id', userId)
-    localStorage.setItem('user_cnpj', cnpj)
-    localStorage.setItem('user_email', email)
+    localStorage.setItem(STORAGE_KEYS.USER_ID, userId)
+    localStorage.setItem(STORAGE_KEYS.USER_CNPJ, cnpj)
+    localStorage.setItem(STORAGE_KEYS.USER_EMAIL, email)
 
     setUser({
       id: userId,
@@ -178,21 +133,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const signOut = useCallback(async () => {
     try {
-      const token = getCachedToken()
-      if (token) {
-        fetch('/api/auth/logout', {
-          method: 'POST',
-          headers: { 'Authorization': `Bearer ${token}` },
-        }).catch(() => {})
-      }
+      // O servidor limpa o cookie httpOnly
+      await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {})
     } finally {
-      clearTokenCache()
+      clearSession()
       clearVolatileCache()
       clearLicenseCache()
-      localStorage.removeItem('user_id')
-      localStorage.removeItem('user_cnpj')
-      localStorage.removeItem('user_name')
-      localStorage.removeItem('user_email')
       setUser(null)
     }
   }, [])

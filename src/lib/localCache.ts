@@ -25,8 +25,8 @@ export function setCache<T>(key: string, data: T): void {
       data,
       cachedAt: Date.now(),
     }))
-  } catch (e) {
-    console.warn('Erro ao salvar cache:', e)
+  } catch {
+    // localStorage cheio ou indisponível — ignora silenciosamente
   }
 }
 

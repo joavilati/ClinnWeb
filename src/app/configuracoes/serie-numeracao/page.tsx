@@ -81,8 +81,7 @@ export default function SerieNumeracaoPage() {
       } else {
         toast.error('Erro ao salvar série e numeração')
       }
-    } catch (error) {
-      console.error('Erro ao salvar série e numeração:', error)
+    } catch {
       toast.error('Erro ao salvar série e numeração')
     } finally {
       setLoading(false)
@@ -104,7 +103,7 @@ export default function SerieNumeracaoPage() {
                   Voltar
                 </Button>
               </Link>
-              <button onClick={handleReload} disabled={reloading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
+              <button onClick={handleReload} disabled={reloading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar" aria-label="Recarregar dados"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
             </div>
             <h1 className="text-3xl font-bold text-gray-900">Série e Numeração (NFS-e)</h1>
             <p className="text-gray-600 mt-2">Configure a série e sequência das notas fiscais</p>

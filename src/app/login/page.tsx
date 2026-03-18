@@ -9,15 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { FileText, Sparkles, Shield, TrendingUp, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-
-function formatCNPJ(value: string): string {
-  const digits = value.replace(/\D/g, '').slice(0, 14)
-  if (digits.length <= 2) return digits
-  if (digits.length <= 5) return `${digits.slice(0, 2)}.${digits.slice(2)}`
-  if (digits.length <= 8) return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5)}`
-  if (digits.length <= 12) return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}/${digits.slice(8)}`
-  return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}/${digits.slice(8, 12)}-${digits.slice(12)}`
-}
+import { formatCnpj } from '@/lib/masks'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -27,7 +19,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
 
   const handleCnpjChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setCnpj(formatCNPJ(e.target.value))
+    setCnpj(formatCnpj(e.target.value))
   }
 
   const handleLogin = async (e: React.FormEvent) => {

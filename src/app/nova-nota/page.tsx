@@ -32,12 +32,8 @@ import { CACHE_KEYS, removeCache } from '@/lib/localCache'
 import { isLicenseActive } from '@/lib/licenseGuard'
 import { LicenseExpiredModal } from '@/components/LicenseExpiredModal'
 import { formatMoney, extractMoneyDigits, moneyDigitsToNumber, numberToMoneyDigits, formatPercent, percentDigitsToNumber } from '@/lib/masks'
+import { ESTADOS } from '@/lib/constants'
 import { MunicipioAutocomplete } from '@/components/MunicipioAutocomplete'
-
-const estados = [
-  'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG',
-  'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO',
-]
 
 const avatarColors = [
   'from-[#7C3AED] to-[#6D28D9]', // purple
@@ -75,7 +71,7 @@ export default function NovaNotaPage() {
     reload: reloadServices,
   } = useCachedData<Service[]>({
     cacheKey: CACHE_KEYS.SERVICES,
-    apiUrl: '/api/services',
+    apiUrl: '/api/configuracoes/servicos',
     normalize: normalizeServices,
   })
 
@@ -651,7 +647,7 @@ export default function NovaNotaPage() {
                           <SelectValue placeholder="Selecione o estado" />
                         </SelectTrigger>
                         <SelectContent>
-                          {estados.map((estado) => (
+                          {ESTADOS.map((estado) => (
                             <SelectItem key={estado} value={estado}>
                               {estado}
                             </SelectItem>
