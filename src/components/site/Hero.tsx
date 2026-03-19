@@ -42,7 +42,7 @@ export function Hero() {
         style={{ animationDelay: "2s" }}
       />
 
-      <div className="relative z-10 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      <div className="relative z-10 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
         {/* Left side - Content */}
         <div className="space-y-8 animate-[fadeInUp_0.8s_ease-out]">
           {/* Badge */}
@@ -58,7 +58,7 @@ export function Hero() {
 
           {/* Main heading */}
           <div className="space-y-6">
-            <h1 className="text-5xl md:text-6xl xl:text-7xl leading-[1.1] tracking-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl leading-[1.1] tracking-tight">
               <span className="block text-gray-900">Emita NFS-e em</span>
               <span className="block bg-gradient-to-r from-violet-600 via-purple-600 to-violet-600 bg-clip-text text-transparent bg-[length:200%_200%] animate-[gradientShift_4s_linear_infinite]">
                 segundos

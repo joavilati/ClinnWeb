@@ -68,7 +68,7 @@ export default function AlterarSenhaPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <div className="max-w-2xl mx-auto">
           <div className="mb-8">
             <Link href="/configuracoes">

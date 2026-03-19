@@ -143,7 +143,7 @@ export default function PerfilPage() {
   if (!isEditing) {
     return (
       <DashboardLayout>
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/20 to-gray-50 p-8">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/20 to-gray-50 p-4 sm:p-6 lg:p-8">
           <div className="max-w-5xl mx-auto">
             {/* Header */}
             <div className="mb-8 relative">
@@ -152,7 +152,7 @@ export default function PerfilPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="flex items-center gap-3 mb-2">
-                      <h1 className="text-4xl font-bold text-gray-900">Perfil da Empresa</h1>
+                      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">Perfil da Empresa</h1>
                       <button onClick={async () => { setReloading(true); await reload(); setReloading(false); toast.success('Dados atualizados') }} disabled={reloading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar" aria-label="Recarregar dados"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
                     </div>
                     <p className="text-gray-600">Informações cadastrais da sua empresa</p>
@@ -283,7 +283,7 @@ export default function PerfilPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <div className="max-w-5xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900">Editar Perfil</h1>
@@ -297,7 +297,7 @@ export default function PerfilPage() {
                 <CardTitle>Dados Gerais</CardTitle>
               </CardHeader>
               <CardContent className="pt-6 space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Razão Social</Label>
                     <Input
@@ -345,7 +345,7 @@ export default function PerfilPage() {
                 <CardTitle>Contato</CardTitle>
               </CardHeader>
               <CardContent className="pt-6">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Email</Label>
                     <Input
@@ -372,7 +372,7 @@ export default function PerfilPage() {
                 <CardTitle>Endereço</CardTitle>
               </CardHeader>
               <CardContent className="pt-6 space-y-4">
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label>CEP</Label>
                     <Input
@@ -390,7 +390,7 @@ export default function PerfilPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label>Número</Label>
                     <Input
@@ -407,7 +407,7 @@ export default function PerfilPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label>Bairro</Label>
                     <Input
@@ -441,7 +441,7 @@ export default function PerfilPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label>Código do Município (IBGE)</Label>
                     <Input

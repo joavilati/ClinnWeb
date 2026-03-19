@@ -201,7 +201,7 @@ export function Contact() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-16 mb-16">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 xl:gap-16 mb-16">
           {/* Contact form */}
           <div className="xl:col-span-2">
             <div className="bg-white/70 backdrop-blur-sm border border-white/50 rounded-xl shadow-2xl">

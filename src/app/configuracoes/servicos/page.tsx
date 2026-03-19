@@ -157,7 +157,7 @@ export default function ServicosPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <div className="max-w-6xl mx-auto">
           <div className="mb-8">
             <Link href="/configuracoes">
@@ -192,8 +192,8 @@ export default function ServicosPage() {
               <CardTitle>Lista de Serviços</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="border rounded-lg overflow-hidden">
-                <table className="w-full">
+              <div className="border rounded-lg overflow-x-auto">
+                <table className="w-full min-w-[600px]">
                   <thead className="bg-gray-50 border-b">
                     <tr>
                       <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Nome do Serviço</th>
@@ -271,7 +271,7 @@ export default function ServicosPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Código de Tributação</Label>
                   <Input

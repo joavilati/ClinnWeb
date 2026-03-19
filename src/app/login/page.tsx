@@ -52,7 +52,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex bg-white">
       {/* Left side - Branding */}
-      <div className="hidden lg:flex lg:w-[480px] xl:w-[540px] flex-col justify-center bg-gradient-to-br from-[#7C3AED] to-[#6D28D9] text-white p-12 relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-2/5 xl:w-[540px] flex-col justify-center bg-gradient-to-br from-[#7C3AED] to-[#6D28D9] text-white p-12 relative overflow-hidden">
         {/* Subtle background shapes */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32"></div>
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full -ml-24 -mb-24"></div>

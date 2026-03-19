@@ -104,27 +104,19 @@ export default function DashboardPage() {
       textColor: 'text-red-600',
       type: 'count' as const,
     },
-    {
-      key: 'taxaSucesso' as const,
-      title: 'Taxa de Sucesso',
-      icon: CheckCircle,
-      color: 'bg-gradient-to-br from-[#7C3AED] to-[#6D28D9]',
-      textColor: 'text-[#7C3AED]',
-      type: 'percent' as const,
-    },
   ]
 
   return (
     <DashboardLayout>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/20 to-gray-50">
-        <div className="p-8">
+        <div className="p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
             {/* Header with gradient */}
             <div className="mb-8 relative">
               <div className="absolute inset-0 bg-gradient-to-r from-[#7C3AED]/10 to-transparent rounded-3xl -z-10"></div>
               <div className="py-6">
                 <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-4xl font-bold text-gray-900">Dashboard</h1>
+                  <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">Dashboard</h1>
                   <button onClick={async () => { setReloading(true); await reload(); setReloading(false); toast.success('Dados atualizados') }} disabled={reloading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar" aria-label="Recarregar dados"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
                 </div>
                 <p className="text-gray-600 flex items-center gap-2">
@@ -142,9 +134,9 @@ export default function DashboardPage() {
             )}
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
               {isLoading
-                ? Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)
+                ? Array.from({ length: 3 }).map((_, i) => <StatCardSkeleton key={i} />)
                 : statsConfig.map((stat) => {
                     const Icon = stat.icon
                     const metric: DashboardMetric | undefined = data?.[stat.key]

@@ -46,7 +46,7 @@ const settingsOptions = [
 export default function ConfiguracoesPage() {
   return (
     <DashboardLayout>
-      <div className="p-8">
+      <div className="p-4 sm:p-6 lg:p-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900">Configurações</h1>

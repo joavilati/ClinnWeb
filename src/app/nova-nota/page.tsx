@@ -374,12 +374,12 @@ export default function NovaNotaPage() {
     return (
       <DashboardLayout>
         {licenseModal}
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/20 to-gray-50 p-8">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/20 to-gray-50 p-4 sm:p-6 lg:p-8">
           <div className="max-w-5xl mx-auto">
             <div className="mb-8 relative">
               <div className="absolute inset-0 bg-gradient-to-r from-[#7C3AED]/10 to-transparent rounded-3xl -z-10"></div>
               <div className="py-6">
-                <h1 className="text-4xl font-bold text-gray-900 mb-2">Nova Nota Fiscal</h1>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Nova Nota Fiscal</h1>
                 <p className="text-gray-600">Selecione o cliente para iniciar a emissão</p>
               </div>
             </div>
@@ -451,7 +451,7 @@ export default function NovaNotaPage() {
                           </div>
                           <button
                             onClick={(e) => handleEditClient(client, e)}
-                            className="p-2 rounded-lg text-gray-400 hover:text-[#7C3AED] hover:bg-[#FAF5FF] transition-colors opacity-0 group-hover:opacity-100"
+                            className="p-2 rounded-lg text-gray-400 hover:text-[#7C3AED] hover:bg-[#FAF5FF] transition-colors sm:opacity-0 sm:group-hover:opacity-100"
                             title="Editar cliente"
                           >
                             <Pencil className="w-4 h-4" />
@@ -523,7 +523,7 @@ export default function NovaNotaPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                       <Label className="text-sm text-gray-700">{newClientData.documentType}</Label>
                       <Input
@@ -573,7 +573,7 @@ export default function NovaNotaPage() {
                 <div className="space-y-4">
                   <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Endereço</h3>
 
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="space-y-1.5">
                       <Label className="text-sm text-gray-700">CEP</Label>
                       <Input
@@ -598,7 +598,7 @@ export default function NovaNotaPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <div className="space-y-1.5">
                       <Label className="text-sm text-gray-700">Número</Label>
                       <Input
@@ -634,7 +634,7 @@ export default function NovaNotaPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                       <Label className="text-sm text-gray-700">Estado</Label>
                       <Select
@@ -713,30 +713,30 @@ export default function NovaNotaPage() {
     return (
       <DashboardLayout>
         {licenseModal}
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/20 to-gray-50 p-8">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/20 to-gray-50 p-4 sm:p-6 lg:p-8">
           <div className="max-w-4xl mx-auto">
             {/* Progress bar */}
             <div className="mb-8">
-              <div className="flex items-center justify-center gap-3 mb-6">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] text-white flex items-center justify-center font-bold shadow-lg">
-                    <Check className="w-5 h-5" />
+              <div className="flex items-center justify-center gap-2 sm:gap-3 mb-6">
+                <button onClick={() => setStep('clients')} className="flex items-center gap-1.5 sm:gap-2 cursor-pointer">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] text-white flex items-center justify-center font-bold shadow-lg">
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
-                  <span className="text-sm font-medium text-[#7C3AED]">Cliente</span>
-                </div>
-                <div className="w-20 h-1 bg-gradient-to-r from-[#7C3AED] to-[#6D28D9]"></div>
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] text-white flex items-center justify-center font-bold shadow-lg">
+                  <span className="text-xs sm:text-sm font-medium text-[#7C3AED]">Cliente</span>
+                </button>
+                <div className="w-8 sm:w-20 h-1 bg-gradient-to-r from-[#7C3AED] to-[#6D28D9]"></div>
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] text-white flex items-center justify-center font-bold shadow-lg text-sm sm:text-base">
                     2
                   </div>
-                  <span className="text-sm font-medium text-[#7C3AED]">Serviço</span>
+                  <span className="text-xs sm:text-sm font-medium text-[#7C3AED]">Serviço</span>
                 </div>
-                <div className="w-20 h-1 bg-gray-200"></div>
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center font-bold">
+                <div className="w-8 sm:w-20 h-1 bg-gray-200"></div>
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center font-bold text-sm sm:text-base">
                     3
                   </div>
-                  <span className="text-sm font-medium text-gray-400">Revisão</span>
+                  <span className="text-xs sm:text-sm font-medium text-gray-400">Revisão</span>
                 </div>
               </div>
             </div>
@@ -948,30 +948,30 @@ export default function NovaNotaPage() {
     return (
       <DashboardLayout>
         {licenseModal}
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/20 to-gray-50 p-8">
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/20 to-gray-50 p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
             {/* Progress bar */}
             <div className="mb-8">
-              <div className="flex items-center justify-center gap-3 mb-6">
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] text-white flex items-center justify-center font-bold shadow-lg">
-                    <Check className="w-5 h-5" />
+              <div className="flex items-center justify-center gap-2 sm:gap-3 mb-6">
+                <button onClick={() => setStep('clients')} className="flex items-center gap-1.5 sm:gap-2 cursor-pointer">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] text-white flex items-center justify-center font-bold shadow-lg">
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
-                  <span className="text-sm font-medium text-[#7C3AED]">Cliente</span>
-                </div>
-                <div className="w-20 h-1 bg-gradient-to-r from-[#7C3AED] to-[#6D28D9]"></div>
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] text-white flex items-center justify-center font-bold shadow-lg">
-                    <Check className="w-5 h-5" />
+                  <span className="text-xs sm:text-sm font-medium text-[#7C3AED]">Cliente</span>
+                </button>
+                <div className="w-8 sm:w-20 h-1 bg-gradient-to-r from-[#7C3AED] to-[#6D28D9]"></div>
+                <button onClick={() => setStep('service')} className="flex items-center gap-1.5 sm:gap-2 cursor-pointer">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] text-white flex items-center justify-center font-bold shadow-lg">
+                    <Check className="w-4 h-4 sm:w-5 sm:h-5" />
                   </div>
-                  <span className="text-sm font-medium text-[#7C3AED]">Serviço</span>
-                </div>
-                <div className="w-20 h-1 bg-gradient-to-r from-[#7C3AED] to-[#6D28D9]"></div>
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] text-white flex items-center justify-center font-bold shadow-lg animate-pulse">
+                  <span className="text-xs sm:text-sm font-medium text-[#7C3AED]">Serviço</span>
+                </button>
+                <div className="w-8 sm:w-20 h-1 bg-gradient-to-r from-[#7C3AED] to-[#6D28D9]"></div>
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-r from-[#7C3AED] to-[#6D28D9] text-white flex items-center justify-center font-bold shadow-lg animate-pulse text-sm sm:text-base">
                     3
                   </div>
-                  <span className="text-sm font-medium text-[#7C3AED]">Revisão</span>
+                  <span className="text-xs sm:text-sm font-medium text-[#7C3AED]">Revisão</span>
                 </div>
               </div>
             </div>
@@ -980,7 +980,7 @@ export default function NovaNotaPage() {
             <div className="mb-8 relative">
               <div className="absolute inset-0 bg-gradient-to-r from-[#7C3AED]/10 to-transparent rounded-3xl -z-10"></div>
               <div className="py-6">
-                <h1 className="text-4xl font-bold text-gray-900 mb-2">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
                   Revisão da Nota Fiscal
                 </h1>
                 <p className="text-gray-600">
@@ -1163,7 +1163,7 @@ export default function NovaNotaPage() {
               {/* Right Column - Summary */}
               <div className="space-y-6">
                 {/* Value Summary */}
-                <Card className="border-none shadow-xl overflow-hidden sticky top-8">
+                <Card className="border-none shadow-xl overflow-hidden lg:sticky lg:top-8">
                   <div className="h-2 bg-gradient-to-r from-[#7C3AED] via-[#8B5CF6] to-[#6D28D9]"></div>
                   <CardHeader className="bg-gradient-to-br from-[#7C3AED] to-[#6D28D9] text-white">
                     <CardTitle className="text-xl flex items-center justify-between">
