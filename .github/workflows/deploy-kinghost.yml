@@ -89,24 +89,15 @@ jobs:
           import posixpath
           import ssl
           import traceback
-          from ftplib import FTP_TLS, error_perm
+          from ftplib import FTP_TLS
           from pathlib import Path
 
           host = os.environ["KH_HOST"]
           user = os.environ["KH_USER"]
           password = os.environ["KH_PASSWORD"]
-          configured_path = os.environ.get("KH_PATH", "").strip()
           local_root = Path("deploy")
 
           remote_path = "/apps_nodejs"
-          if configured_path:
-            normalized = configured_path if configured_path.startswith("/") else f"/{configured_path}"
-            if normalized in ("/apps_nodejs",):
-              remote_path = normalized
-            elif normalized.startswith("/apps_nodejs/"):
-              print(f"KH_PATH points to a nested path ({configured_path}). KingHost exposed the app root as /apps_nodejs, so deploy will use /apps_nodejs instead.")
-            else:
-              remote_path = normalized
 
           if not local_root.exists():
             raise SystemExit("Local deploy directory was not created.")
@@ -136,32 +127,13 @@ jobs:
                 ftp.cwd(path)
                 return
               except Exception:
-                pass
-
-              ftp.cwd("/")
-
-              for part in [part for part in path.split("/") if part]:
-                try:
-                  ftp.cwd(part)
-                except Exception:
-                  try:
-                    ftp.mkd(part)
-                  except error_perm:
-                    pass
-                  ftp.cwd(part)
-
-              ftp.cwd("/")
+                raise RuntimeError(f"Remote directory is not accessible: {path}")
 
             def is_dir(path: str) -> bool:
               try:
                 ftp.cwd(path)
-                ftp.cwd("/")
                 return True
               except Exception:
-                try:
-                  ftp.cwd("/")
-                except Exception:
-                  pass
                 return False
 
             def list_entries(path: str) -> dict[str, str]:
@@ -176,7 +148,6 @@ jobs:
                 for name in normalize_names(ftp.nlst()):
                   child = posixpath.join(path, name)
                   entries[name] = "dir" if is_dir(child) else "file"
-              ftp.cwd("/")
               return entries
 
             def remove_tree(path: str) -> None:
@@ -196,7 +167,6 @@ jobs:
                 else:
                   ftp.delete(child)
 
-              ftp.cwd("/")
               ftp.rmd(path)
 
             def sync_dir(local_dir: Path, remote_dir: str) -> None:
