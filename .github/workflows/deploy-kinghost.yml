@@ -72,11 +72,6 @@ jobs:
           fs.writeFileSync(path, content);
           EOF
 
-      - name: Install lftp
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y lftp
-
       - name: Deploy via FTPS
         env:
           KH_HOST: ${{ secrets.KH_HOST }}
@@ -89,37 +84,124 @@ jobs:
             exit 1
           fi
 
-          REMOTE_PATH="/apps_nodejs"
-          if [ -n "$KH_PATH" ]; then
-            case "$KH_PATH" in
-              /apps_nodejs|apps_nodejs)
-                REMOTE_PATH="/apps_nodejs"
-                ;;
-              /apps_nodejs/*|apps_nodejs/*)
-                echo "KH_PATH points to a nested path ($KH_PATH). KingHost exposed the app root as /apps_nodejs, so deploy will use /apps_nodejs instead."
-                ;;
-              /*)
-                REMOTE_PATH="$KH_PATH"
-                ;;
-              *)
-                REMOTE_PATH="/$KH_PATH"
-                ;;
-            esac
-          fi
+          python3 <<'PY'
+          import os
+          import posixpath
+          import ssl
+          from ftplib import FTP_TLS, error_perm
+          from pathlib import Path
 
-          echo "Deploying to ${REMOTE_PATH}"
+          host = os.environ["KH_HOST"]
+          user = os.environ["KH_USER"]
+          password = os.environ["KH_PASSWORD"]
+          configured_path = os.environ.get("KH_PATH", "").strip()
+          local_root = Path("deploy")
 
-          lftp -e "
-            set cmd:fail-exit true;
-            set ftp:ssl-force true;
-            set ftp:ssl-protect-data true;
-            set ssl:verify-certificate no;
-            set ftp:passive-mode on;
-            set net:max-retries 2;
-            set net:timeout 20;
-            open -u ${KH_USER},${KH_PASSWORD} ftp://${KH_HOST};
-            cd ${REMOTE_PATH};
-            pwd;
-            mirror -R --delete --verbose --parallel=2 deploy .;
-            bye
-          "
+          remote_path = "/apps_nodejs"
+          if configured_path:
+            normalized = configured_path if configured_path.startswith("/") else f"/{configured_path}"
+            if normalized in ("/apps_nodejs",):
+              remote_path = normalized
+            elif normalized.startswith("/apps_nodejs/"):
+              print(f"KH_PATH points to a nested path ({configured_path}). KingHost exposed the app root as /apps_nodejs, so deploy will use /apps_nodejs instead.")
+            else:
+              remote_path = normalized
+
+          if not local_root.exists():
+            raise SystemExit("Local deploy directory was not created.")
+
+          print(f"Deploying {local_root} to {host}:{remote_path}")
+
+          ftp = FTP_TLS(context=ssl._create_unverified_context(), timeout=30)
+          ftp.connect(host, 21)
+          ftp.login(user, password)
+          ftp.prot_p()
+          ftp.set_pasv(True)
+
+          def ensure_dir(path: str) -> None:
+            current = ftp.pwd()
+            try:
+              ftp.cwd(path)
+              ftp.cwd(current)
+              return
+            except Exception:
+              pass
+
+            if path.startswith("/"):
+              ftp.cwd("/")
+            else:
+              ftp.cwd(current)
+
+            for part in [part for part in path.split("/") if part]:
+              try:
+                ftp.cwd(part)
+              except Exception:
+                try:
+                  ftp.mkd(part)
+                except error_perm:
+                  pass
+                ftp.cwd(part)
+
+            ftp.cwd(current)
+
+          def list_entries(path: str) -> dict[str, str]:
+            current = ftp.pwd()
+            ftp.cwd(path)
+            entries: dict[str, str] = {}
+            for name, facts in ftp.mlsd():
+              if name in (".", ".."):
+                continue
+              entries[name] = facts.get("type", "")
+            ftp.cwd(current)
+            return entries
+
+          def remove_tree(path: str) -> None:
+            current = ftp.pwd()
+            try:
+              ftp.cwd(path)
+            except Exception:
+              try:
+                ftp.delete(path)
+              except Exception:
+                pass
+              return
+
+            for name, facts in ftp.mlsd():
+              if name in (".", ".."):
+                continue
+              child = posixpath.join(path, name)
+              if facts.get("type") == "dir":
+                remove_tree(child)
+              else:
+                ftp.delete(child)
+
+            ftp.cwd(current)
+            ftp.rmd(path)
+
+          def sync_dir(local_dir: Path, remote_dir: str) -> None:
+            ensure_dir(remote_dir)
+            remote_entries = list_entries(remote_dir)
+            local_entries = {path.name: path for path in local_dir.iterdir()}
+
+            for name, remote_type in remote_entries.items():
+              if name in local_entries:
+                continue
+              child = posixpath.join(remote_dir, name)
+              if remote_type == "dir":
+                remove_tree(child)
+              else:
+                ftp.delete(child)
+
+            for name, path in local_entries.items():
+              remote_child = posixpath.join(remote_dir, name)
+              if path.is_dir():
+                sync_dir(path, remote_child)
+              else:
+                with path.open("rb") as handle:
+                  ftp.storbinary(f"STOR {remote_child}", handle)
+
+          ensure_dir(remote_path)
+          sync_dir(local_root, remote_path)
+          print("Remote entries after deploy:", sorted(list_entries(remote_path)))
+          ftp.quit()
+          PY
