@@ -129,21 +129,16 @@ jobs:
             ftp.login(user, password)
             ftp.prot_p()
             ftp.set_pasv(True)
-            print("Connected to FTPS. Initial remote directory:", ftp.pwd())
+            print("Connected to FTPS.")
 
             def ensure_dir(path: str) -> None:
-              current = ftp.pwd()
               try:
                 ftp.cwd(path)
-                ftp.cwd(current)
                 return
               except Exception:
                 pass
 
-              if path.startswith("/"):
-                ftp.cwd("/")
-              else:
-                ftp.cwd(current)
+              ftp.cwd("/")
 
               for part in [part for part in path.split("/") if part]:
                 try:
@@ -155,19 +150,21 @@ jobs:
                     pass
                   ftp.cwd(part)
 
-              ftp.cwd(current)
+              ftp.cwd("/")
 
             def is_dir(path: str) -> bool:
-              current = ftp.pwd()
               try:
                 ftp.cwd(path)
-                ftp.cwd(current)
+                ftp.cwd("/")
                 return True
               except Exception:
+                try:
+                  ftp.cwd("/")
+                except Exception:
+                  pass
                 return False
 
             def list_entries(path: str) -> dict[str, str]:
-              current = ftp.pwd()
               ftp.cwd(path)
               entries: dict[str, str] = {}
               try:
@@ -179,11 +176,10 @@ jobs:
                 for name in normalize_names(ftp.nlst()):
                   child = posixpath.join(path, name)
                   entries[name] = "dir" if is_dir(child) else "file"
-              ftp.cwd(current)
+              ftp.cwd("/")
               return entries
 
             def remove_tree(path: str) -> None:
-              current = ftp.pwd()
               try:
                 ftp.cwd(path)
               except Exception:
@@ -200,7 +196,7 @@ jobs:
                 else:
                   ftp.delete(child)
 
-              ftp.cwd(current)
+              ftp.cwd("/")
               ftp.rmd(path)
 
             def sync_dir(local_dir: Path, remote_dir: str) -> None:
