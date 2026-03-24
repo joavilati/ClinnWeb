@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { Suspense, useState, useMemo, useEffect, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import DashboardLayout from '@/components/DashboardLayout'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -48,7 +48,7 @@ function getAvatarColor(index: number): string {
   return avatarColors[index % avatarColors.length]
 }
 
-export default function NovaNotaPage() {
+function NovaNotaPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { apiFetch } = useApiClient()
@@ -1312,4 +1312,27 @@ export default function NovaNotaPage() {
   }
 
   return null
+}
+
+function NovaNotaPageFallback() {
+  return (
+    <DashboardLayout>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/20 to-gray-50 p-8">
+        <div className="max-w-5xl mx-auto flex items-center justify-center py-20">
+          <div className="flex items-center gap-3 text-gray-600">
+            <Loader2 className="w-6 h-6 text-[#7C3AED] animate-spin" />
+            <span>Carregando emissao de nota...</span>
+          </div>
+        </div>
+      </div>
+    </DashboardLayout>
+  )
+}
+
+export default function NovaNotaPage() {
+  return (
+    <Suspense fallback={<NovaNotaPageFallback />}>
+      <NovaNotaPageContent />
+    </Suspense>
+  )
 }

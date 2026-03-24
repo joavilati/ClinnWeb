@@ -1,0 +1,103 @@
+name: Deploy KingHost
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+concurrency:
+  group: deploy-kinghost
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Create .env
+        env:
+          APP_ENV: ${{ secrets.APP_ENV }}
+        run: |
+          if [ -z "$APP_ENV" ]; then
+            echo "GitHub secret APP_ENV is required." >&2
+            exit 1
+          fi
+
+          printf '%s\n' "$APP_ENV" > .env
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build standalone app
+        run: npm run build
+
+      - name: Prepare deploy directory
+        run: |
+          rm -rf deploy
+          mkdir -p deploy/.next
+
+          cp -R .next/standalone/. deploy/
+          cp -R .next/static deploy/.next/static
+
+          if [ -d public ]; then
+            cp -R public deploy/public
+          fi
+
+          node <<'EOF'
+          const fs = require('fs');
+          const path = 'deploy/server.js';
+
+          let content = fs.readFileSync(path, 'utf8');
+          const original = "const currentPort = parseInt(process.env.PORT, 10) || 3000";
+          const replacement = "const currentPort = parseInt(process.env.PORT || process.env.PORT_SERVER || '3000', 10) || 3000";
+
+          if (!content.includes('process.env.PORT_SERVER')) {
+            content = content.replace(original, replacement);
+          }
+
+          if (!content.includes('process.env.PORT_SERVER')) {
+            throw new Error('Could not patch deploy/server.js to support PORT_SERVER.');
+          }
+
+          fs.writeFileSync(path, content);
+          EOF
+
+      - name: Install lftp
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lftp
+
+      - name: Deploy via FTPS
+        env:
+          KH_HOST: ${{ secrets.KH_HOST }}
+          KH_USER: ${{ secrets.KH_USER }}
+          KH_PASSWORD: ${{ secrets.KH_PASSWORD }}
+          KH_PATH: ${{ secrets.KH_PATH }}
+        run: |
+          if [ -z "$KH_HOST" ] || [ -z "$KH_USER" ] || [ -z "$KH_PASSWORD" ] || [ -z "$KH_PATH" ]; then
+            echo "GitHub secrets KH_HOST, KH_USER, KH_PASSWORD and KH_PATH are required." >&2
+            exit 1
+          fi
+
+          lftp -e "
+            set ftp:ssl-force true;
+            set ftp:ssl-protect-data true;
+            set ssl:verify-certificate no;
+            set ftp:passive-mode on;
+            set net:max-retries 2;
+            set net:timeout 20;
+            open -u ${KH_USER},${KH_PASSWORD} ftp://${KH_HOST};
+            mkdir -p ${KH_PATH};
+            mirror -R --delete --verbose --parallel=2 deploy ${KH_PATH};
+            bye
+          "
