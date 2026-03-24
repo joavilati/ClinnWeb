@@ -2,9 +2,6 @@ name: Deploy KingHost
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
 
 concurrency:
   group: deploy-kinghost

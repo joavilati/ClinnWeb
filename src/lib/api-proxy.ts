@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 const APP_VERSION = process.env.npm_package_version || '1.0.0'
 const AUTH_COOKIE = 'auth_token'
 const COOKIE_MAX_AGE = 24 * 60 * 60 // 24h em segundos
+const DEFAULT_API_BASE_URL = 'https://api.clinnota.com.br'
 
 /**
  * Define o cookie httpOnly com o token JWT na resposta.
@@ -91,7 +92,7 @@ export async function proxyToBackend(
       return errorResponse('Method not allowed', 405)
     }
 
-    const apiBase = process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_URL
+    const apiBase = process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || DEFAULT_API_BASE_URL
     if (!apiBase) {
       return errorResponse('API base url not configured', 500, 'API_NOT_CONFIGURED')
     }
