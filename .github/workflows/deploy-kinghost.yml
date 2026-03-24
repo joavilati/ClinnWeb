@@ -96,6 +96,7 @@ jobs:
           user = os.environ["KH_USER"]
           password = os.environ["KH_PASSWORD"]
           local_root = Path("deploy")
+          fallback_host = "ftp.nodejsng1f02.kinghost.net"
 
           remote_path = "/apps_nodejs"
 
@@ -114,84 +115,104 @@ jobs:
               normalized.append(posixpath.basename(name.rstrip("/")))
             return sorted(set(normalized))
 
-          try:
-            ftp = FTP_TLS(context=ssl._create_unverified_context(), timeout=30)
-            ftp.connect(host, 21)
-            ftp.login(user, password)
-            ftp.prot_p()
-            ftp.set_pasv(True)
-            print("Connected to FTPS.")
-
-            def ensure_dir(path: str) -> None:
-              try:
-                ftp.cwd(path)
-                return
-              except Exception:
-                raise RuntimeError(f"Remote directory is not accessible: {path}")
-
-            def is_dir(path: str) -> bool:
-              try:
-                ftp.cwd(path)
-                return True
-              except Exception:
-                return False
-
-            def list_entries(path: str) -> dict[str, str]:
+          def ensure_dir(path: str) -> None:
+            try:
               ftp.cwd(path)
-              entries: dict[str, str] = {}
-              try:
-                for name, facts in ftp.mlsd():
-                  if name in (".", ".."):
-                    continue
-                  entries[name] = facts.get("type", "")
-              except Exception:
-                for name in normalize_names(ftp.nlst()):
-                  child = posixpath.join(path, name)
-                  entries[name] = "dir" if is_dir(child) else "file"
-              return entries
+              return
+            except Exception:
+              raise RuntimeError(f"Remote directory is not accessible: {path}")
 
-            def remove_tree(path: str) -> None:
-              try:
-                ftp.cwd(path)
-              except Exception:
-                try:
-                  ftp.delete(path)
-                except Exception:
-                  pass
-                return
+          def is_dir(path: str) -> bool:
+            try:
+              ftp.cwd(path)
+              return True
+            except Exception:
+              return False
 
-              for name, facts in list_entries(path).items():
-                child = posixpath.join(path, name)
-                if facts == "dir":
-                  remove_tree(child)
-                else:
-                  ftp.delete(child)
-
-              ftp.rmd(path)
-
-            def sync_dir(local_dir: Path, remote_dir: str) -> None:
-              ensure_dir(remote_dir)
-              remote_entries = list_entries(remote_dir)
-              local_entries = {path.name: path for path in local_dir.iterdir()}
-
-              for name, remote_type in remote_entries.items():
-                if name in local_entries:
+          def list_entries(path: str) -> dict[str, str]:
+            ftp.cwd(path)
+            entries: dict[str, str] = {}
+            try:
+              for name, facts in ftp.mlsd():
+                if name in (".", ".."):
                   continue
-                child = posixpath.join(remote_dir, name)
-                if remote_type == "dir":
-                  remove_tree(child)
-                else:
-                  ftp.delete(child)
+                entries[name] = facts.get("type", "")
+            except Exception:
+              for name in normalize_names(ftp.nlst()):
+                child = posixpath.join(path, name)
+                entries[name] = "dir" if is_dir(child) else "file"
+            return entries
 
-              for name, path in local_entries.items():
-                remote_child = posixpath.join(remote_dir, name)
-                if path.is_dir():
-                  sync_dir(path, remote_child)
-                else:
-                  with path.open("rb") as handle:
-                    ftp.storbinary(f"STOR {remote_child}", handle)
+          def remove_tree(path: str) -> None:
+            try:
+              ftp.cwd(path)
+            except Exception:
+              try:
+                ftp.delete(path)
+              except Exception:
+                pass
+              return
 
-            ensure_dir(remote_path)
+            for name, facts in list_entries(path).items():
+              child = posixpath.join(path, name)
+              if facts == "dir":
+                remove_tree(child)
+              else:
+                ftp.delete(child)
+
+            ftp.rmd(path)
+
+          def sync_dir(local_dir: Path, remote_dir: str) -> None:
+            ensure_dir(remote_dir)
+            remote_entries = list_entries(remote_dir)
+            local_entries = {path.name: path for path in local_dir.iterdir()}
+
+            for name, remote_type in remote_entries.items():
+              if name in local_entries:
+                continue
+              child = posixpath.join(remote_dir, name)
+              if remote_type == "dir":
+                remove_tree(child)
+              else:
+                ftp.delete(child)
+
+            for name, path in local_entries.items():
+              remote_child = posixpath.join(remote_dir, name)
+              if path.is_dir():
+                sync_dir(path, remote_child)
+              else:
+                with path.open("rb") as handle:
+                  ftp.storbinary(f"STOR {remote_child}", handle)
+
+          try:
+            errors = []
+            ftp_hosts = [host]
+            if fallback_host not in ftp_hosts:
+              ftp_hosts.append(fallback_host)
+
+            for candidate_host in ftp_hosts:
+              try:
+                ftp = FTP_TLS(context=ssl._create_unverified_context(), timeout=30)
+                ftp.connect(candidate_host, 21)
+                ftp.login(user, password)
+                ftp.prot_p()
+                ftp.set_pasv(True)
+                print(f"Connected to FTPS host {candidate_host}.")
+                ensure_dir(remote_path)
+                print(f"Using FTPS host {candidate_host}.")
+                break
+              except Exception as exc:
+                errors.append(f"{candidate_host}: {type(exc).__name__}: {exc}")
+                if ftp is not None:
+                  try:
+                    ftp.quit()
+                  except Exception:
+                    pass
+                  ftp = None
+
+            if ftp is None:
+              raise RuntimeError("No FTPS host could access the remote directory. " + " | ".join(errors))
+
             sync_dir(local_root, remote_path)
             print("Remote entries after deploy:", sorted(list_entries(remote_path)))
           except Exception as exc:
