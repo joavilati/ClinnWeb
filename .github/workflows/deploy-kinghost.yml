@@ -84,12 +84,33 @@ jobs:
           KH_PASSWORD: ${{ secrets.KH_PASSWORD }}
           KH_PATH: ${{ secrets.KH_PATH }}
         run: |
-          if [ -z "$KH_HOST" ] || [ -z "$KH_USER" ] || [ -z "$KH_PASSWORD" ] || [ -z "$KH_PATH" ]; then
-            echo "GitHub secrets KH_HOST, KH_USER, KH_PASSWORD and KH_PATH are required." >&2
+          if [ -z "$KH_HOST" ] || [ -z "$KH_USER" ] || [ -z "$KH_PASSWORD" ]; then
+            echo "GitHub secrets KH_HOST, KH_USER and KH_PASSWORD are required." >&2
             exit 1
           fi
 
+          REMOTE_PATH="/apps_nodejs"
+          if [ -n "$KH_PATH" ]; then
+            case "$KH_PATH" in
+              /apps_nodejs|apps_nodejs)
+                REMOTE_PATH="/apps_nodejs"
+                ;;
+              /apps_nodejs/*|apps_nodejs/*)
+                echo "KH_PATH points to a nested path ($KH_PATH). KingHost exposed the app root as /apps_nodejs, so deploy will use /apps_nodejs instead."
+                ;;
+              /*)
+                REMOTE_PATH="$KH_PATH"
+                ;;
+              *)
+                REMOTE_PATH="/$KH_PATH"
+                ;;
+            esac
+          fi
+
+          echo "Deploying to ${REMOTE_PATH}"
+
           lftp -e "
+            set cmd:fail-exit true;
             set ftp:ssl-force true;
             set ftp:ssl-protect-data true;
             set ssl:verify-certificate no;
@@ -97,7 +118,8 @@ jobs:
             set net:max-retries 2;
             set net:timeout 20;
             open -u ${KH_USER},${KH_PASSWORD} ftp://${KH_HOST};
-            mkdir -p ${KH_PATH};
-            mirror -R --delete --verbose --parallel=2 deploy ${KH_PATH};
+            cd ${REMOTE_PATH};
+            pwd;
+            mirror -R --delete --verbose --parallel=2 deploy .;
             bye
           "
