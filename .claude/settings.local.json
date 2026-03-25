@@ -5,7 +5,10 @@
       "Bash(cd:*)",
       "Bash(ls:*)",
       "Bash(npx tsc:*)",
-      "Bash(xargs cat:*)"
+      "Bash(xargs cat:*)",
+      "Bash(npm run:*)",
+      "Bash(cp -r .next/static .next/standalone/.next/static)",
+      "Bash(cp -r public .next/standalone/public)"
     ]
   }
 }
