@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { Suspense, useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import DashboardLayout from '@/components/DashboardLayout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -45,10 +46,12 @@ function formatLicenseStatus(status: string): string {
   }
 }
 
-export default function PagamentosPage() {
+function PagamentosContent() {
   const { apiFetch } = useApiClient()
+  const searchParams = useSearchParams()
   const [subscribingPlan, setSubscribingPlan] = useState<string | null>(null)
   const [reloading, setReloading] = useState(false)
+  const [activatingLicense, setActivatingLicense] = useState(false)
 
   const { data: license, reload } = useCachedData<License>({
     cacheKey: CACHE_KEYS.LICENSE,
@@ -66,21 +69,54 @@ export default function PagamentosPage() {
     }
   }, [license])
 
-  const handleSubscribe = async (planType: string) => {
-    setSubscribingPlan(planType)
-    try {
-      const res = await apiFetch('/api/license', {
+  // Detecta retorno do pagamento com sucesso e ativa a licença
+  useEffect(() => {
+    const pagamento = searchParams.get('pagamento')
+    const plano = searchParams.get('plano')
+    if (pagamento === 'sucesso' && plano) {
+      setActivatingLicense(true)
+      const planType = plano.toUpperCase()
+
+      apiFetch('/api/license', {
         method: 'POST',
         body: JSON.stringify({ type: planType }),
       })
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}))
-        throw new Error(err.message || 'Erro ao assinar plano')
+        .then(async (res) => {
+          if (res.ok) {
+            toast.success('Pagamento confirmado! Sua licença foi ativada.')
+            await reload()
+          } else {
+            const err = await res.json().catch(() => ({}))
+            toast.error(err.message || 'Pagamento realizado, mas houve um erro ao ativar a licença. Entre em contato com o suporte.')
+          }
+        })
+        .catch(() => {
+          toast.error('Erro ao ativar licença. Entre em contato com o suporte.')
+        })
+        .finally(() => {
+          setActivatingLicense(false)
+          window.history.replaceState({}, '', '/pagamentos')
+        })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const handleSubscribe = async (planType: string) => {
+    setSubscribingPlan(planType)
+    try {
+      const res = await fetch('/api/payment/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planType }),
+      })
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        throw new Error(data.error || 'Erro ao criar pagamento')
       }
-      await reload()
-      toast.success('Plano assinado com sucesso!')
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Erro ao assinar plano'
+      const message = error instanceof Error ? error.message : 'Erro ao iniciar pagamento'
       toast.error(message)
     } finally {
       setSubscribingPlan(null)
@@ -101,6 +137,18 @@ export default function PagamentosPage() {
             <h1 className="text-3xl font-bold text-gray-900">Planos</h1>
             <button onClick={async () => { setReloading(true); await reload(); setReloading(false); toast.success('Dados atualizados') }} disabled={reloading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar" aria-label="Recarregar dados"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
           </div>
+
+          {/* Ativando licença após pagamento */}
+          {activatingLicense && (
+            <Card className="border-none shadow-lg mb-6 overflow-hidden">
+              <div className="bg-gradient-to-r from-amber-400 to-amber-500 p-4">
+                <div className="flex items-center gap-3">
+                  <Loader2 className="w-5 h-5 animate-spin text-white" />
+                  <p className="text-white font-semibold">Ativando sua licença...</p>
+                </div>
+              </div>
+            </Card>
+          )}
 
           {/* Current License Card */}
           {license && (
@@ -160,8 +208,8 @@ export default function PagamentosPage() {
                   disabled={subscribingPlan === 'MONTHLY' || currentType === 'MONTHLY'}
                 >
                   {subscribingPlan === 'MONTHLY' ? (
-                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processando...</>
-                  ) : currentType === 'MONTHLY' ? 'Plano Atual' : 'Selecionar plano'}
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Redirecionando...</>
+                  ) : currentType === 'MONTHLY' ? 'Plano Atual' : 'Assinar plano'}
                 </Button>
               </CardContent>
             </Card>
@@ -202,8 +250,8 @@ export default function PagamentosPage() {
                   disabled={subscribingPlan === 'ANNUAL' || currentType === 'ANNUAL'}
                 >
                   {subscribingPlan === 'ANNUAL' ? (
-                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processando...</>
-                  ) : currentType === 'ANNUAL' ? 'Plano Atual' : 'Selecionar plano'}
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Redirecionando...</>
+                  ) : currentType === 'ANNUAL' ? 'Plano Atual' : 'Assinar plano'}
                 </Button>
               </CardContent>
             </Card>
@@ -242,5 +290,26 @@ export default function PagamentosPage() {
         </div>
       </div>
     </DashboardLayout>
+  )
+}
+
+export default function PagamentosPage() {
+  return (
+    <Suspense fallback={
+      <DashboardLayout>
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/20 to-gray-50 p-8">
+          <div className="max-w-5xl mx-auto">
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900">Planos</h1>
+            </div>
+            <div className="flex items-center justify-center py-20">
+              <Loader2 className="w-8 h-8 animate-spin text-[#7C3AED]" />
+            </div>
+          </div>
+        </div>
+      </DashboardLayout>
+    }>
+      <PagamentosContent />
+    </Suspense>
   )
 }
