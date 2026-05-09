@@ -112,7 +112,7 @@ export default function RelatorioCrescimentoPage() {
       value: String(novasEmpresasMes),
       change: "",
       changeType: "positive" as const,
-      detail: "vs mes anterior",
+      detail: "vs mês anterior",
       icon: UserPlus,
       gradient: "from-emerald-500 to-green-500",
       bgGradient: "from-emerald-50 to-green-50",
@@ -147,7 +147,7 @@ export default function RelatorioCrescimentoPage() {
           <Users className="w-6 h-6 text-white" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Relatorio de Crescimento</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Relatório de Crescimento</h1>
           <p className="text-sm text-gray-500">Acompanhe a evolucao da base de empresas</p>
         </div>
       </div>

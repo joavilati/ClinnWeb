@@ -227,7 +227,7 @@ export default function LicencasPage() {
               <div className="space-y-2">
                 <p className="text-sm font-medium text-gray-600">Expiradas</p>
                 <p className="text-3xl font-bold text-red-600">{expiradas}</p>
-                <p className="text-xs text-red-600 font-medium">requer acao</p>
+                <p className="text-xs text-red-600 font-medium">requer ação</p>
               </div>
               <div className="p-3 rounded-2xl bg-gradient-to-br from-red-500 to-rose-500 shadow-lg">
                 <XCircle className="w-6 h-6 text-white" />
@@ -263,7 +263,7 @@ export default function LicencasPage() {
               </div>
               <div>
                 <p className="font-semibold text-yellow-800">
-                  {expiringIn7Days.length} licenca(s) expirando nos proximos 7
+                  {expiringIn7Days.length} licenca(s) expirando nos próximos 7
                   dias
                 </p>
                 <p className="text-sm text-yellow-600">
@@ -322,7 +322,7 @@ export default function LicencasPage() {
                 <TableHead>CNPJ</TableHead>
                 <TableHead>Tipo</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Data Inicio</TableHead>
+                <TableHead>Data Início</TableHead>
                 <TableHead>Data Expiracao</TableHead>
                 <TableHead>Dias Restantes</TableHead>
                 <TableHead>Acoes</TableHead>

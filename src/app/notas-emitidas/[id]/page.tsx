@@ -357,7 +357,7 @@ function generateNfsePdf(note: NoteData): jsPDF {
     }
 
     // Right column
-    drawText('Numero da Nota', rightColX + 6 * PT_TO_MM, y + 10 * PT_TO_MM, 'normal', FONT_SIZE_SMALL)
+    drawText('Número da Nota', rightColX + 6 * PT_TO_MM, y + 10 * PT_TO_MM, 'normal', FONT_SIZE_SMALL)
     drawText(
       (note.numeroNota || '').padStart(8, '0'),
       rightColX + 6 * PT_TO_MM,
@@ -410,7 +410,7 @@ function generateNfsePdf(note: NoteData): jsPDF {
     ty += LINE_HEIGHT
 
     drawText(
-      `Nome/Razao Social: ${emitente.nome || ''}`,
+      `Nome/Razão Social: ${emitente.nome || ''}`,
       MARGIN + 8 * PT_TO_MM,
       ty + 4 * PT_TO_MM,
       'bold',
@@ -419,7 +419,7 @@ function generateNfsePdf(note: NoteData): jsPDF {
     ty += LINE_HEIGHT
 
     drawText(
-      `Endereco: ${formatEnderecoCompleto(emitente.endereco)}`,
+      `Endereço: ${formatEnderecoCompleto(emitente.endereco)}`,
       MARGIN + 8 * PT_TO_MM,
       ty + 4 * PT_TO_MM,
       'normal',
@@ -457,7 +457,7 @@ function generateNfsePdf(note: NoteData): jsPDF {
     let ty = boxTop + 17 * PT_TO_MM
 
     drawText(
-      `Nome/Razao Social: ${tomador.nome || ''}`,
+      `Nome/Razão Social: ${tomador.nome || ''}`,
       MARGIN + 8 * PT_TO_MM,
       ty + 4 * PT_TO_MM,
       'bold',
@@ -482,7 +482,7 @@ function generateNfsePdf(note: NoteData): jsPDF {
     ty += LINE_HEIGHT
 
     drawText(
-      `Endereco: ${formatEnderecoCompleto(tomador.endereco)}`,
+      `Endereço: ${formatEnderecoCompleto(tomador.endereco)}`,
       MARGIN + 8 * PT_TO_MM,
       ty + 4 * PT_TO_MM,
       'normal',
@@ -594,7 +594,7 @@ function generateNfsePdf(note: NoteData): jsPDF {
 
     drawRect(MARGIN, boxTop, CONTENT_W, boxH)
 
-    drawText('Codigo do Servico', MARGIN + 8 * PT_TO_MM, boxTop + 10 * PT_TO_MM, 'normal', FONT_SIZE_SMALL)
+    drawText('Codigo do Serviço', MARGIN + 8 * PT_TO_MM, boxTop + 10 * PT_TO_MM, 'normal', FONT_SIZE_SMALL)
     const codTrib = servico.codigoTributacaoNacional || ''
     const descCod = servico.descricaoCodigoTributacaoNacional || ''
     const codText = descCod ? `${codTrib} - ${descCod}` : codTrib
@@ -646,7 +646,7 @@ function generateNfsePdf(note: NoteData): jsPDF {
     const col3W = CONTENT_W / 3
 
     drawText(
-      'Municipio de Prestacao do Servico',
+      'Municipio de Prestacao do Serviço',
       MARGIN + 8 * PT_TO_MM,
       y2 + 10 * PT_TO_MM,
       'normal',
@@ -793,12 +793,12 @@ export default function NoteViewPage({ params }: { params: Promise<{ id: string 
         }
 
         if (!note) {
-          throw new Error('Nota nao encontrada')
+          throw new Error('Nota não encontrada')
         }
 
         if (!note.snapshot) {
           throw new Error(
-            'Dados detalhados (snapshot) nao disponiveis para esta nota. O PDF nao pode ser gerado.'
+            'Dados detalhados (snapshot) não disponíveis para está nota. O PDF não pode ser gerado.'
           )
         }
 

@@ -44,7 +44,7 @@ interface AdminSidebarProps {
 
 export default function AdminSidebar({ isOpen = true, onClose, onLogout }: AdminSidebarProps) {
   const pathname = usePathname()
-  const [relatoriosOpen, setRelatoriosOpen] = useState(pathname.startsWith('/admin/relatorios'))
+  const [relatoriosOpen, setRelatoriosOpen] = useState(pathname.startsWith('/admin/relatórios'))
 
   const isActive = (path: string) => {
     if (path === '/admin/dashboard') return pathname === '/admin/dashboard' || pathname === '/admin'
@@ -114,19 +114,19 @@ export default function AdminSidebar({ isOpen = true, onClose, onLogout }: Admin
             )
           })}
 
-          {/* Relatorios submenu */}
+          {/* Relatórios submenu */}
           <div>
             <button
               onClick={() => setRelatoriosOpen(!relatoriosOpen)}
               className={cn(
                 'w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200',
-                pathname.startsWith('/admin/relatorios')
+                pathname.startsWith('/admin/relatórios')
                   ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg shadow-blue-500/40'
                   : 'text-gray-700 hover:text-gray-900 hover:bg-white/70 hover:shadow-sm'
               )}
             >
               <BarChart3 className="w-5 h-5 flex-shrink-0" />
-              <span className="font-medium">Relatorios</span>
+              <span className="font-medium">Relatórios</span>
               <ChevronDown
                 className={cn(
                   'w-4 h-4 ml-auto transition-transform duration-200',

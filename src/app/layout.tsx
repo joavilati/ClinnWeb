@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import "../styles/theme.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SWRProvider } from "@/lib/swrConfig";
-import { Toaster } from "sonner";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { AppToaster } from "@/components/AppToaster";
 
 export const metadata: Metadata = {
   title: "ClinNota | Emissor de Notas Fiscais de Serviço",
@@ -22,14 +22,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
-      <body className="min-h-screen bg-gray-50 antialiased">
-        <SWRProvider>
-          <AuthProvider>
-            {children}
-            <Toaster richColors position="top-right" />
-          </AuthProvider>
-        </SWRProvider>
+    <html lang="pt-BR" suppressHydrationWarning>
+      <body className="min-h-screen bg-background text-foreground antialiased">
+        <ThemeProvider>
+          <SWRProvider>
+            <AuthProvider>
+              {children}
+              <AppToaster />
+            </AuthProvider>
+          </SWRProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

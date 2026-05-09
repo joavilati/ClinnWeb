@@ -213,11 +213,11 @@ export default function ServicosPage() {
             </Link>
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Serviços</h1>
-                <p className="text-gray-600 mt-2">Gerencie os serviços cadastrados</p>
+                <h1 className="text-3xl font-bold text-foreground">Serviços</h1>
+                <p className="text-muted-foreground mt-2">Gerencie os serviços cadastrados</p>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={async () => { setReloading(true); await reload(); setReloading(false); toast.success('Dados atualizados') }} disabled={reloading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar" aria-label="Recarregar dados"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
+                <button onClick={async () => { setReloading(true); await reload(); setReloading(false); toast.success('Dados atualizados') }} disabled={reloading} className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar" aria-label="Recarregar dados"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
                 <Button
                   onClick={() => handleOpenModal()}
                   className="bg-[#7C3AED] hover:bg-[#6D28D9] text-white"
@@ -236,35 +236,35 @@ export default function ServicosPage() {
             <CardContent>
               <div className="border rounded-lg overflow-x-auto">
                 <table className="w-full min-w-[600px]">
-                  <thead className="bg-gray-50 border-b">
+                  <thead className="bg-background border-b">
                     <tr>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Nome do Serviço</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Código Tributação</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">CNAE</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Valor Padrão</th>
-                      <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">Ações</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Nome do Serviço</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Código Tributação</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">CNAE</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Valor Padrão</th>
+                      <th className="px-6 py-4 text-right text-sm font-semibold text-foreground">Ações</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y">
                     {loadingList ? (
                       <tr>
-                        <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                        <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
                           Carregando serviços...
                         </td>
                       </tr>
                     ) : !services || services.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                        <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
                           Nenhum serviço cadastrado
                         </td>
                       </tr>
                     ) : (
                       (services || []).map((service) => (
-                        <tr key={service.id} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-6 py-4 text-sm font-medium text-gray-900">{service.name}</td>
-                          <td className="px-6 py-4 text-sm text-gray-600">{service.code}</td>
-                          <td className="px-6 py-4 text-sm text-gray-600">{service.cnae}</td>
-                          <td className="px-6 py-4 text-sm font-medium text-gray-900">{service.value}</td>
+                        <tr key={service.id} className="hover:bg-background transition-colors">
+                          <td className="px-6 py-4 text-sm font-medium text-foreground">{service.name}</td>
+                          <td className="px-6 py-4 text-sm text-muted-foreground">{service.code}</td>
+                          <td className="px-6 py-4 text-sm text-muted-foreground">{service.cnae}</td>
+                          <td className="px-6 py-4 text-sm font-medium text-foreground">{service.value}</td>
                           <td className="px-6 py-4 text-right">
                             <div className="flex items-center justify-end gap-2">
                               <Button

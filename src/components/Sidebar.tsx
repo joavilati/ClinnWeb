@@ -45,12 +45,12 @@ export default function Sidebar({ isOpen = true, onClose, onLogout }: SidebarPro
       {/* Sidebar */}
       <aside className={cn(
         'fixed inset-y-0 left-0 z-30 w-64 transform transition-transform duration-300 ease-in-out',
-        'bg-gradient-to-b from-[#8B5CF6] to-[#7C3AED] text-white flex flex-col',
+        'bg-gradient-to-b from-[#8B5CF6] to-[#7C3AED] dark:from-[#3F1D72] dark:to-[#2A1456] text-white flex flex-col',
         'lg:translate-x-0 lg:static lg:inset-0',
         isOpen ? 'translate-x-0' : '-translate-x-full'
       )}>
         {/* Logo */}
-        <div className="p-6 border-b border-purple-500/30">
+        <div className="p-6 border-b border-purple-500/30 dark:border-purple-900/50">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold">ClinNota</h1>
@@ -86,8 +86,8 @@ export default function Sidebar({ isOpen = true, onClose, onLogout }: SidebarPro
                     className={cn(
                       'w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all',
                       isActive
-                        ? 'bg-white text-[#7C3AED] shadow-md font-medium'
-                        : 'text-white hover:bg-white/10'
+                        ? 'bg-white text-[#7C3AED] dark:bg-[#7C3AED] dark:text-white shadow-md font-medium'
+                        : 'text-white hover:bg-white/10 dark:hover:bg-white/5'
                     )}
                   >
                     <Icon className="w-5 h-5" />
@@ -100,10 +100,10 @@ export default function Sidebar({ isOpen = true, onClose, onLogout }: SidebarPro
         </nav>
 
         {/* Logout */}
-        <div className="p-4 border-t border-purple-500/30">
+        <div className="p-4 border-t border-purple-500/30 dark:border-purple-900/50">
           <button
             onClick={onLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-white hover:bg-white/10 transition-all"
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-white hover:bg-white/10 dark:hover:bg-white/5 transition-all"
           >
             <LogOut className="w-5 h-5" />
             <span>Sair</span>

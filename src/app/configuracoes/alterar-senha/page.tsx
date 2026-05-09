@@ -80,8 +80,8 @@ export default function AlterarSenhaPage() {
                 Voltar
               </Button>
             </Link>
-            <h1 className="text-3xl font-bold text-gray-900">Alterar Senha</h1>
-            <p className="text-gray-600 mt-2">Atualize sua senha de acesso</p>
+            <h1 className="text-3xl font-bold text-foreground">Alterar Senha</h1>
+            <p className="text-muted-foreground mt-2">Atualize sua senha de acesso</p>
           </div>
 
           <Card className="border-none shadow-md">
@@ -110,7 +110,7 @@ export default function AlterarSenhaPage() {
                     value={formData.newPassword}
                     onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
                   />
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-muted-foreground">
                     A senha deve ter no mínimo 6 caracteres
                   </p>
                 </div>

@@ -63,7 +63,7 @@ export default function ConfiguracoesPage() {
         </div>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Configuracoes</h1>
-          <p className="text-sm text-gray-500">Gerencie admins, notificacoes e auditoria</p>
+          <p className="text-sm text-gray-500">Gerencie admins, notificações e auditoria</p>
         </div>
       </div>
 
@@ -138,7 +138,7 @@ export default function ConfiguracoesPage() {
             <div className="p-2 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 shadow-lg">
               <Bell className="w-4 h-4 text-white" />
             </div>
-            Notificacoes
+            Notificações
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -146,7 +146,7 @@ export default function ConfiguracoesPage() {
             <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors">
               <div>
                 <p className="text-sm font-semibold text-gray-800">Novo cadastro</p>
-                <p className="text-xs text-gray-500 mt-0.5">Receba notificacao quando uma nova empresa se cadastrar</p>
+                <p className="text-xs text-gray-500 mt-0.5">Receba notificação quando uma nova empresa se cadastrar</p>
               </div>
               <Switch
                 checked={notifications.novoCadastro}

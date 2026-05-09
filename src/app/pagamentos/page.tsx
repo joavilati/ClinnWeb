@@ -130,12 +130,12 @@ function PagamentosContent() {
 
   return (
     <DashboardLayout>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/20 to-gray-50 p-8">
+      <div className="min-h-screen bg-background p-8">
         <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="mb-8 flex items-center gap-3">
-            <h1 className="text-3xl font-bold text-gray-900">Planos</h1>
-            <button onClick={async () => { setReloading(true); await reload(); setReloading(false); toast.success('Dados atualizados') }} disabled={reloading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar" aria-label="Recarregar dados"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
+            <h1 className="text-3xl font-bold text-foreground">Planos</h1>
+            <button onClick={async () => { setReloading(true); await reload(); setReloading(false); toast.success('Dados atualizados') }} disabled={reloading} className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar" aria-label="Recarregar dados"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
           </div>
 
           {/* Ativando licença após pagamento */}
@@ -176,34 +176,34 @@ function PagamentosContent() {
           )}
 
           {/* Plans Title */}
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Escolha seu plano</h2>
+          <h2 className="text-xl font-bold text-foreground mb-6">Escolha seu plano</h2>
 
           {/* Plan Cards - Equal Height */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {/* Monthly Plan */}
-            <Card className={`relative border-2 border-gray-200 shadow-md flex flex-col`}>
+            <Card className={`relative border-2 border-border shadow-md flex flex-col`}>
               <CardContent className="p-6 flex flex-col flex-1">
-                <p className="text-lg font-bold text-gray-900 mb-3">Plano Mensal</p>
+                <p className="text-lg font-bold text-foreground mb-3">Plano Mensal</p>
 
                 <div className="flex items-baseline gap-1 mb-1">
-                  <span className="text-3xl font-bold text-gray-900">R$ 99,90</span>
-                  <span className="text-gray-500">/mês</span>
+                  <span className="text-3xl font-bold text-foreground">R$ 99,90</span>
+                  <span className="text-muted-foreground">/mês</span>
                 </div>
 
-                <div className="border-t border-gray-100 my-5" />
+                <div className="border-t border-border my-5" />
 
                 <ul className="space-y-3 flex-1">
                   {monthlyFeatures.map((f, i) => (
                     <li key={i} className="flex items-center gap-2.5">
                       <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
-                      <span className="text-sm text-gray-700">{f}</span>
+                      <span className="text-sm text-foreground">{f}</span>
                     </li>
                   ))}
                 </ul>
 
                 <Button
                   variant="outline"
-                  className="w-full mt-6 h-11 font-semibold border-gray-300"
+                  className="w-full mt-6 h-11 font-semibold border-border"
                   onClick={() => handleSubscribe('MONTHLY')}
                   disabled={subscribingPlan === 'MONTHLY' || currentType === 'MONTHLY'}
                 >
@@ -222,24 +222,24 @@ function PagamentosContent() {
               </div>
 
               <CardContent className="p-6 flex flex-col flex-1">
-                <p className="text-lg font-bold text-gray-900 mb-3">Plano Anual</p>
+                <p className="text-lg font-bold text-foreground mb-3">Plano Anual</p>
 
                 <div className="flex items-baseline gap-1 mb-1">
                   <span className="text-3xl font-bold text-[#7C3AED]">R$ 999,90</span>
-                  <span className="text-gray-500">/ano</span>
+                  <span className="text-muted-foreground">/ano</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="text-sm">🔥</span>
                   <span className="text-sm text-green-600 font-semibold">Economize R$ 198,90</span>
                 </div>
 
-                <div className="border-t border-gray-100 my-5" />
+                <div className="border-t border-border my-5" />
 
                 <ul className="space-y-3 flex-1">
                   {annualFeatures.map((f, i) => (
                     <li key={i} className="flex items-center gap-2.5">
                       <Check className="w-4 h-4 text-[#7C3AED] flex-shrink-0" />
-                      <span className="text-sm text-gray-700">{f}</span>
+                      <span className="text-sm text-foreground">{f}</span>
                     </li>
                   ))}
                 </ul>
@@ -264,8 +264,8 @@ function PagamentosContent() {
                 <div className="w-10 h-10 rounded-full bg-[#7C3AED]/10 flex items-center justify-center mb-3">
                   <CheckCircle className="w-5 h-5 text-[#7C3AED]" />
                 </div>
-                <p className="font-bold text-sm text-gray-900 mb-1">Sem compromisso</p>
-                <p className="text-xs text-gray-500">Cancele a qualquer momento sem multas ou taxas adicionais</p>
+                <p className="font-bold text-sm text-foreground mb-1">Sem compromisso</p>
+                <p className="text-xs text-muted-foreground">Cancele a qualquer momento sem multas ou taxas adicionais</p>
               </CardContent>
             </Card>
             <Card className="border-none shadow-sm">
@@ -273,8 +273,8 @@ function PagamentosContent() {
                 <div className="w-10 h-10 rounded-full bg-[#7C3AED]/10 flex items-center justify-center mb-3">
                   <CreditCard className="w-5 h-5 text-[#7C3AED]" />
                 </div>
-                <p className="font-bold text-sm text-gray-900 mb-1">Pagamento seguro</p>
-                <p className="text-xs text-gray-500">Transações protegidas com criptografia de ponta a ponta</p>
+                <p className="font-bold text-sm text-foreground mb-1">Pagamento seguro</p>
+                <p className="text-xs text-muted-foreground">Transações protegidas com criptografia de ponta a ponta</p>
               </CardContent>
             </Card>
             <Card className="border-none shadow-sm">
@@ -282,8 +282,8 @@ function PagamentosContent() {
                 <div className="w-10 h-10 rounded-full bg-[#7C3AED]/10 flex items-center justify-center mb-3">
                   <HeadphonesIcon className="w-5 h-5 text-[#7C3AED]" />
                 </div>
-                <p className="font-bold text-sm text-gray-900 mb-1">Suporte dedicado</p>
-                <p className="text-xs text-gray-500">Equipe técnica disponível para ajudar quando precisar</p>
+                <p className="font-bold text-sm text-foreground mb-1">Suporte dedicado</p>
+                <p className="text-xs text-muted-foreground">Equipe técnica disponível para ajudar quando precisar</p>
               </CardContent>
             </Card>
           </div>
@@ -297,10 +297,10 @@ export default function PagamentosPage() {
   return (
     <Suspense fallback={
       <DashboardLayout>
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/20 to-gray-50 p-8">
+        <div className="min-h-screen bg-background p-8">
           <div className="max-w-5xl mx-auto">
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">Planos</h1>
+              <h1 className="text-3xl font-bold text-foreground">Planos</h1>
             </div>
             <div className="flex items-center justify-center py-20">
               <Loader2 className="w-8 h-8 animate-spin text-[#7C3AED]" />

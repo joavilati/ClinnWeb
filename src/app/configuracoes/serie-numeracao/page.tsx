@@ -103,10 +103,10 @@ export default function SerieNumeracaoPage() {
                   Voltar
                 </Button>
               </Link>
-              <button onClick={handleReload} disabled={reloading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar" aria-label="Recarregar dados"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
+              <button onClick={handleReload} disabled={reloading} className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar" aria-label="Recarregar dados"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">Série e Numeração (NFS-e)</h1>
-            <p className="text-gray-600 mt-2">Configure a série e sequência das notas fiscais</p>
+            <h1 className="text-3xl font-bold text-foreground">Série e Numeração (NFS-e)</h1>
+            <p className="text-muted-foreground mt-2">Configure a série e sequência das notas fiscais</p>
           </div>
 
           <Card className="border-none shadow-md">
@@ -123,37 +123,37 @@ export default function SerieNumeracaoPage() {
                   placeholder="001"
                   className="max-w-xs"
                 />
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   Identifica a série das notas fiscais (geralmente 001)
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="numero-inicial">Número Inicial</Label>
+                <Label htmlFor="número-inicial">Número Inicial</Label>
                 <Input
-                  id="numero-inicial"
+                  id="número-inicial"
                   type="number"
                   value={numeroInicial}
                   onChange={(e) => setNumeroInicial(e.target.value)}
                   placeholder="1"
                   className="max-w-xs"
                 />
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   Número da próxima nota fiscal a ser emitida
                 </p>
               </div>
 
               <div className="flex items-center justify-between p-4 border rounded-lg">
                 <div>
-                  <Label htmlFor="sequencia-automatica" className="text-base font-semibold">
+                  <Label htmlFor="sequencia-automática" className="text-base font-semibold">
                     Sequência Automática
                   </Label>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-sm text-muted-foreground mt-1">
                     Incrementar numeração automaticamente a cada nota emitida
                   </p>
                 </div>
                 <Switch
-                  id="sequencia-automatica"
+                  id="sequencia-automática"
                   checked={sequenciaAutomatica}
                   onCheckedChange={setSequenciaAutomatica}
                 />

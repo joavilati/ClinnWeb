@@ -34,9 +34,9 @@ const regimeOptions = [
 
 const issOptions = [
   { value: 'exigivel', label: 'Exigível', description: 'ISS é exigível normalmente' },
-  { value: 'nao-incidencia', label: 'Não Incidência', description: 'Serviço não está sujeito ao ISS' },
+  { value: 'não-incidencia', label: 'Não Incidência', description: 'Serviço não está sujeito ao ISS' },
   { value: 'isencao', label: 'Isenção', description: 'Serviço está isento de ISS' },
-  { value: 'exportacao', label: 'Exportação', description: 'Serviço prestado para o exterior' },
+  { value: 'exportação', label: 'Exportação', description: 'Serviço prestado para o exterior' },
   { value: 'imunidade', label: 'Imunidade', description: 'Imune à tributação do ISS' },
   { value: 'suspensa', label: 'Exigibilidade Suspensa', description: 'Exigibilidade do ISS está suspensa' },
 ]
@@ -56,19 +56,19 @@ function RadioCard({ value, label, description, selected, onSelect }: RadioCardP
       onClick={() => onSelect(value)}
       className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ${
         selected
-          ? 'border-[#7C3AED] bg-[#FAF5FF] shadow-sm'
-          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+          ? 'border-[#7C3AED] bg-[#FAF5FF] dark:bg-[#7C3AED]/20 shadow-sm'
+          : 'border-border hover:border-muted-foreground/40 hover:bg-accent/40'
       }`}
     >
       <div className="flex items-start gap-3">
         <div className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
-          selected ? 'border-[#7C3AED] bg-[#7C3AED]' : 'border-gray-300'
+          selected ? 'border-[#7C3AED] bg-[#7C3AED]' : 'border-border'
         }`}>
           {selected && <Check className="w-3 h-3 text-white" />}
         </div>
         <div className="flex-1 min-w-0">
-          <p className={`font-medium ${selected ? 'text-[#7C3AED]' : 'text-gray-900'}`}>{label}</p>
-          <p className="text-sm text-gray-500 mt-0.5">{description}</p>
+          <p className={`font-medium ${selected ? 'text-[#7C3AED] dark:text-[#C4B5FD]' : 'text-foreground'}`}>{label}</p>
+          <p className={`text-sm mt-0.5 ${selected ? 'text-foreground/80' : 'text-muted-foreground'}`}>{description}</p>
         </div>
       </div>
     </button>
@@ -155,10 +155,10 @@ export default function DadosFiscaisPage() {
                   Voltar
                 </Button>
               </Link>
-              <button onClick={handleReload} disabled={reloading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar" aria-label="Recarregar dados"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
+              <button onClick={handleReload} disabled={reloading} className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar" aria-label="Recarregar dados"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">Dados Fiscais</h1>
-            <p className="text-gray-600 mt-2">Configure as informações fiscais da empresa</p>
+            <h1 className="text-3xl font-bold text-foreground">Dados Fiscais</h1>
+            <p className="text-muted-foreground mt-2">Configure as informações fiscais da empresa</p>
           </div>
 
           <div className="space-y-8">
@@ -166,7 +166,7 @@ export default function DadosFiscaisPage() {
             <Card className="border-none shadow-md">
               <CardHeader className="pb-4">
                 <CardTitle className="text-lg">Regime de Apuração de Tributos</CardTitle>
-                <p className="text-sm text-gray-500">Selecione como os tributos são calculados</p>
+                <p className="text-sm text-muted-foreground">Selecione como os tributos são calculados</p>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -192,7 +192,7 @@ export default function DadosFiscaisPage() {
                     <Label htmlFor="simples-nacional" className="text-base font-semibold">
                       Simples Nacional
                     </Label>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-muted-foreground mt-1">
                       Marque se sua empresa é optante pelo Simples Nacional
                     </p>
                   </div>
@@ -209,7 +209,7 @@ export default function DadosFiscaisPage() {
             <Card className="border-none shadow-md">
               <CardHeader className="pb-4">
                 <CardTitle className="text-lg">Exigibilidade do ISS</CardTitle>
-                <p className="text-sm text-gray-500">Defina a exigibilidade do ISS para os serviços</p>
+                <p className="text-sm text-muted-foreground">Defina a exigibilidade do ISS para os serviços</p>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

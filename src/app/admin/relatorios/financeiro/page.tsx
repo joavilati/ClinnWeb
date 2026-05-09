@@ -162,7 +162,7 @@ export default function RelatorioFinanceiroPage() {
           <TrendingUp className="w-6 h-6 text-white" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Relatorio Financeiro</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Relatório Financeiro</h1>
           <p className="text-sm text-gray-500">Visao geral das financas da plataforma</p>
         </div>
       </div>

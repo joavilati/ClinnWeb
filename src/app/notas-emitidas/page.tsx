@@ -56,13 +56,13 @@ function formatDate(dateStr: string): string {
 function TableRowSkeleton() {
   return (
     <tr className="animate-pulse">
-      <td className="px-6 py-4"><div className="h-4 w-16 bg-gray-200 rounded" /></td>
-      <td className="px-6 py-4"><div className="h-4 w-20 bg-gray-200 rounded" /></td>
-      <td className="px-6 py-4"><div className="h-4 w-32 bg-gray-200 rounded" /></td>
-      <td className="px-6 py-4"><div className="h-4 w-28 bg-gray-200 rounded" /></td>
-      <td className="px-6 py-4"><div className="h-4 w-20 bg-gray-200 rounded" /></td>
-      <td className="px-6 py-4"><div className="h-5 w-16 bg-gray-200 rounded-full" /></td>
-      <td className="px-6 py-4 text-right"><div className="h-5 w-5 bg-gray-200 rounded ml-auto" /></td>
+      <td className="px-6 py-4"><div className="h-4 w-16 bg-muted rounded" /></td>
+      <td className="px-6 py-4"><div className="h-4 w-20 bg-muted rounded" /></td>
+      <td className="px-6 py-4"><div className="h-4 w-32 bg-muted rounded" /></td>
+      <td className="px-6 py-4"><div className="h-4 w-28 bg-muted rounded" /></td>
+      <td className="px-6 py-4"><div className="h-4 w-20 bg-muted rounded" /></td>
+      <td className="px-6 py-4"><div className="h-5 w-16 bg-muted rounded-full" /></td>
+      <td className="px-6 py-4 text-right"><div className="h-5 w-5 bg-muted rounded ml-auto" /></td>
     </tr>
   )
 }
@@ -179,17 +179,17 @@ export default function NotasEmitidasPage() {
   return (
     <DashboardLayout>
       <LicenseExpiredModal open={showLicenseModal} onClose={() => setShowLicenseModal(false)} />
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/20 to-gray-50 p-4 sm:p-6 lg:p-8">
+      <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
           <div className="mb-8 relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-[#7C3AED]/10 to-transparent rounded-3xl -z-10"></div>
-            <div className="py-6">
+            <div className="hidden dark:block absolute inset-0 bg-[#7C3AED]/10 rounded-3xl -z-10"></div>
+            <div className="py-6 px-6">
               <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">Notas Emitidas</h1>
-                <button onClick={async () => { setReloading(true); await reload(); setReloading(false); toast.success('Dados atualizados') }} disabled={reloading} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar" aria-label="Recarregar dados"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground">Notas Emitidas</h1>
+                <button onClick={async () => { setReloading(true); await reload(); setReloading(false); toast.success('Dados atualizados') }} disabled={reloading} className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar" aria-label="Recarregar dados"><RefreshCw className={`w-5 h-5 ${reloading ? 'animate-spin' : ''}`} /></button>
               </div>
-              <p className="text-gray-600">Gerencie e acompanhe todas as suas notas fiscais</p>
+              <p className="text-muted-foreground">Gerencie e acompanhe todas as suas notas fiscais</p>
             </div>
           </div>
 
@@ -200,25 +200,25 @@ export default function NotasEmitidasPage() {
             </div>
           )}
 
-          <Card className="border-none shadow-xl bg-white/80 backdrop-blur-sm">
-            <CardHeader className="border-b bg-gradient-to-r from-gray-50 to-white">
+          <Card className="shadow-xl">
+            <CardHeader className="border-b dark:bg-muted/40">
               <CardTitle className="text-xl">Histórico de Notas</CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
               {/* Filters */}
               <div className="flex flex-col sm:flex-row gap-3 mb-6">
                 <div className="flex-1 relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <Input
                     placeholder="Buscar por cliente ou número da nota..."
-                    className="pl-10 h-12 border-gray-200 focus:border-[#7C3AED] focus:ring-[#7C3AED]"
+                    className="pl-10 h-12 border-border focus:border-[#7C3AED] focus:ring-[#7C3AED]"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
                 <div className="flex gap-3">
                   <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-                    <SelectTrigger className="w-full sm:w-40 h-12 border-gray-200">
+                    <SelectTrigger className="w-full sm:w-40 h-12 border-border">
                       <SelectValue placeholder="Mês" />
                     </SelectTrigger>
                     <SelectContent>
@@ -228,7 +228,7 @@ export default function NotasEmitidasPage() {
                     </SelectContent>
                   </Select>
                   <Select value={selectedYear} onValueChange={setSelectedYear}>
-                    <SelectTrigger className="w-full sm:w-32 h-12 border-gray-200">
+                    <SelectTrigger className="w-full sm:w-32 h-12 border-border">
                       <SelectValue placeholder="Ano" />
                     </SelectTrigger>
                     <SelectContent>
@@ -241,17 +241,17 @@ export default function NotasEmitidasPage() {
               </div>
 
               {/* Table */}
-              <div className="border-2 border-gray-100 rounded-xl overflow-x-auto">
+              <div className="border-2 border-border rounded-xl overflow-x-auto">
                 <table className="w-full min-w-[700px]">
-                  <thead className="bg-gradient-to-r from-gray-50 to-white border-b-2 border-gray-100">
+                  <thead className="dark:bg-muted/40 border-b-2 border-border">
                     <tr>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Nota #</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Data</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Cliente</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Serviço</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Valor</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Situação</th>
-                      <th className="px-6 py-4 text-right text-sm font-semibold text-gray-700">Ações</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Nota #</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Data</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Cliente</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Serviço</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Valor</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-foreground">Situação</th>
+                      <th className="px-6 py-4 text-right text-sm font-semibold text-foreground">Ações</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -260,8 +260,8 @@ export default function NotasEmitidasPage() {
                     ) : !notes || notes.length === 0 ? (
                       <tr>
                         <td colSpan={7} className="px-6 py-16 text-center">
-                          <div className="flex flex-col items-center text-gray-500">
-                            <FileText className="w-12 h-12 mb-3 text-gray-300" />
+                          <div className="flex flex-col items-center text-muted-foreground">
+                            <FileText className="w-12 h-12 mb-3 text-muted-foreground" />
                             <p className="font-medium text-lg">Nenhuma nota encontrada</p>
                             <p className="text-sm mt-1">
                               {searchTerm || selectedMonth
@@ -277,21 +277,21 @@ export default function NotasEmitidasPage() {
                         return (
                           <tr
                             key={note.id}
-                            className="hover:bg-gradient-to-r hover:from-purple-50/50 hover:to-transparent transition-colors"
+                            className="hover:bg-accent/40 transition-colors"
                           >
                             <td className="px-6 py-4 text-sm font-semibold text-[#7C3AED]">
                               {note.numeroNota}
                             </td>
-                            <td className="px-6 py-4 text-sm text-gray-600">
+                            <td className="px-6 py-4 text-sm text-muted-foreground">
                               {formatDate(note.createdAt)}
                             </td>
-                            <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                            <td className="px-6 py-4 text-sm font-medium text-foreground">
                               {note.clientName}
                             </td>
-                            <td className="px-6 py-4 text-sm text-gray-600">
+                            <td className="px-6 py-4 text-sm text-muted-foreground">
                               {note.serviceDescription}
                             </td>
-                            <td className="px-6 py-4 text-sm font-bold text-gray-900">
+                            <td className="px-6 py-4 text-sm font-bold text-foreground">
                               {formatCurrency(note.valorServico)}
                             </td>
                             <td className="px-6 py-4">
@@ -300,7 +300,7 @@ export default function NotasEmitidasPage() {
                             <td className="px-6 py-4 text-right">
                               <DropdownMenu>
                                 <DropdownMenuTrigger className="p-2 hover:bg-purple-50 rounded-lg transition-colors">
-                                  <MoreVertical className="w-5 h-5 text-gray-600" />
+                                  <MoreVertical className="w-5 h-5 text-muted-foreground" />
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                   <DropdownMenuItem onClick={() => handleView(note)}>
@@ -353,13 +353,13 @@ export default function NotasEmitidasPage() {
           </DialogHeader>
 
           <div className="mt-2">
-            <label htmlFor="cancel-motivo" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="cancel-motivo" className="block text-sm font-medium text-foreground mb-2">
               Motivo do cancelamento <span className="text-red-500">*</span>
             </label>
             <textarea
               id="cancel-motivo"
               rows={3}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] focus:outline-none resize-none placeholder:text-gray-400"
+              className="w-full rounded-lg border border-border px-3 py-2 text-sm shadow-sm focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED] focus:outline-none resize-none placeholder:text-muted-foreground"
               placeholder="Informe o motivo do cancelamento da nota fiscal..."
               value={cancelMotivo}
               onChange={(e) => setCancelMotivo(e.target.value)}

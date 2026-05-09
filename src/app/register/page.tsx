@@ -64,38 +64,38 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
+    <div className="min-h-screen flex items-center justify-center bg-background p-6">
       <div className="w-full max-w-[440px]">
         {/* Logo */}
         <div className="flex items-center justify-center gap-2 mb-8">
           <div className="bg-[#7C3AED] p-2.5 rounded-xl">
             <FileText className="w-6 h-6 text-white" />
           </div>
-          <span className="text-2xl font-bold text-gray-900">ClinNota</span>
+          <span className="text-2xl font-bold text-foreground">ClinNota</span>
         </div>
 
-        <Card className="shadow-sm border border-gray-200 bg-white">
+        <Card className="shadow-sm border border-border bg-card">
           <CardHeader className="space-y-1 text-center pb-4 pt-8 px-8">
-            <CardTitle className="text-2xl font-bold text-gray-900">Criar Conta</CardTitle>
-            <CardDescription className="text-gray-500">
+            <CardTitle className="text-2xl font-bold text-foreground">Criar Conta</CardTitle>
+            <CardDescription className="text-muted-foreground">
               Cadastre-se para começar a emitir notas
             </CardDescription>
           </CardHeader>
           <CardContent className="pb-8 px-8">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="cnpj" className="text-gray-700 text-sm font-medium">CNPJ</Label>
+                <Label htmlFor="cnpj" className="text-foreground text-sm font-medium">CNPJ</Label>
                 <Input
                   id="cnpj"
                   placeholder="00.000.000/0000-00"
                   value={formData.cnpj}
                   onChange={handleCnpjChange}
                   disabled={isLoading}
-                  className="h-11 bg-white border-gray-300 focus:border-[#7C3AED] focus:ring-[#7C3AED]/20"
+                  className="h-11 bg-card border-border focus:border-[#7C3AED] focus:ring-[#7C3AED]/20"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-gray-700 text-sm font-medium">E-mail</Label>
+                <Label htmlFor="email" className="text-foreground text-sm font-medium">E-mail</Label>
                 <Input
                   id="email"
                   type="email"
@@ -103,11 +103,11 @@ export default function RegisterPage() {
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   disabled={isLoading}
-                  className="h-11 bg-white border-gray-300 focus:border-[#7C3AED] focus:ring-[#7C3AED]/20"
+                  className="h-11 bg-card border-border focus:border-[#7C3AED] focus:ring-[#7C3AED]/20"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-gray-700 text-sm font-medium">Senha</Label>
+                <Label htmlFor="password" className="text-foreground text-sm font-medium">Senha</Label>
                 <Input
                   id="password"
                   type="password"
@@ -115,11 +115,11 @@ export default function RegisterPage() {
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   disabled={isLoading}
-                  className="h-11 bg-white border-gray-300 focus:border-[#7C3AED] focus:ring-[#7C3AED]/20"
+                  className="h-11 bg-card border-border focus:border-[#7C3AED] focus:ring-[#7C3AED]/20"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-gray-700 text-sm font-medium">Confirmar Senha</Label>
+                <Label htmlFor="confirmPassword" className="text-foreground text-sm font-medium">Confirmar Senha</Label>
                 <Input
                   id="confirmPassword"
                   type="password"
@@ -127,7 +127,7 @@ export default function RegisterPage() {
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                   disabled={isLoading}
-                  className="h-11 bg-white border-gray-300 focus:border-[#7C3AED] focus:ring-[#7C3AED]/20"
+                  className="h-11 bg-card border-border focus:border-[#7C3AED] focus:ring-[#7C3AED]/20"
                 />
               </div>
               <Button
@@ -146,7 +146,7 @@ export default function RegisterPage() {
               </Button>
             </form>
             <div className="mt-6 text-center">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 Já tem uma conta?{' '}
                 <button
                   onClick={() => router.push('/login')}

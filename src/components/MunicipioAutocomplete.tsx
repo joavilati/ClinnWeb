@@ -119,15 +119,15 @@ export function MunicipioAutocomplete({
           placeholder={!estado ? 'Selecione o estado primeiro' : placeholder}
           disabled={disabled || !estado}
           aria-invalid={invalid}
-          className={`h-11 bg-white border-gray-300 pr-8 ${!estado ? 'opacity-60' : ''}`}
+          className={`h-11 bg-card border-border pr-8 ${!estado ? 'opacity-60' : ''}`}
         />
-        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
       </div>
 
       {open && filtered.length > 0 && (
         <div
           ref={listRef}
-          className="absolute z-50 w-full mt-1 max-h-60 overflow-y-auto bg-white border border-gray-200 rounded-lg shadow-lg"
+          className="absolute z-50 w-full mt-1 max-h-60 overflow-y-auto bg-card border border-border rounded-lg shadow-lg"
         >
           {filtered.map((m, i) => (
             <button
@@ -137,11 +137,11 @@ export function MunicipioAutocomplete({
               className={`w-full text-left px-3 py-2.5 text-sm transition-colors ${
                 i === highlightIndex
                   ? 'bg-[#7C3AED]/10 text-[#7C3AED]'
-                  : 'text-gray-900 hover:bg-gray-50'
+                  : 'text-foreground hover:bg-background'
               }`}
             >
               <span className="font-medium">{m.name}</span>
-              <span className="text-xs text-gray-400 ml-2">{m.code}</span>
+              <span className="text-xs text-muted-foreground ml-2">{m.code}</span>
             </button>
           ))}
         </div>

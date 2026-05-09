@@ -51,7 +51,7 @@ function mapPaymentMethod(method: string | null): string {
   if (!method) return "--"
   const map: Record<string, string> = {
     pix: "PIX",
-    credit_card: "Cartao de Credito",
+    credit_card: "Cartão de Credito",
   }
   return map[method.toLowerCase()] || method
 }
@@ -153,7 +153,7 @@ export default function PagamentosPage() {
         </div>
         <Button className="gap-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700">
           <Download className="h-4 w-4" />
-          Exportar Relatorio
+          Exportar Relatório
         </Button>
       </div>
 

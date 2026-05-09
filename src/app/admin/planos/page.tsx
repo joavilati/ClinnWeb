@@ -33,7 +33,7 @@ const plansStatic = [
   {
     name: "Mensal",
     price: "R$ 99,90",
-    period: "mes",
+    period: "mês",
     description: "Ideal para clinicas em crescimento",
     color: "purple",
     icon: Star,
@@ -49,15 +49,15 @@ const plansStatic = [
     name: "Anual",
     price: "R$ 999,90",
     period: "ano",
-    description: "Melhor custo-beneficio com 2 meses gratis",
+    description: "Melhor custo-beneficio com 2 meses grátis",
     color: "emerald",
     icon: Crown,
     popular: false,
     features: [
       "Tudo do mensal",
       "Suporte prioritario",
-      "2 meses gratis",
-      "Relatorios avancados",
+      "2 meses grátis",
+      "Relatórios avancados",
     ],
   },
 ]

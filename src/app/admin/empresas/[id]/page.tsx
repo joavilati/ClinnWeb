@@ -93,7 +93,7 @@ function mapPaymentMethod(method: string | null): string {
   if (!method) return '--'
   const map: Record<string, string> = {
     pix: 'PIX',
-    credit_card: 'Cartao',
+    credit_card: 'Cartão',
   }
   return map[method.toLowerCase()] || method
 }
@@ -185,7 +185,7 @@ export default function EmpresaDetailPage({ params }: { params: Promise<{ id: st
   if (!empresa) {
     return (
       <div className="flex items-center justify-center py-20">
-        <p className="text-gray-500">Empresa nao encontrada</p>
+        <p className="text-gray-500">Empresa não encontrada</p>
       </div>
     )
   }
@@ -221,7 +221,7 @@ export default function EmpresaDetailPage({ params }: { params: Promise<{ id: st
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Razao Social</p>
+                <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Razão Social</p>
                 <p className="text-sm font-medium text-gray-900 mt-1">{empresa.razaoSocial}</p>
               </div>
               <div>
@@ -286,7 +286,7 @@ export default function EmpresaDetailPage({ params }: { params: Promise<{ id: st
                     </span>
                   </div>
                   <div>
-                    <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Data Inicio</p>
+                    <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Data Início</p>
                     <p className="text-sm text-gray-900 mt-1 flex items-center gap-1.5">
                       <Calendar className="w-3.5 h-3.5 text-gray-400" />
                       {formatDate(empresa.licenca.startDate)}
@@ -471,7 +471,7 @@ export default function EmpresaDetailPage({ params }: { params: Promise<{ id: st
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-gray-900">{empresa.uso.servicosCadastrados}</p>
-                  <p className="text-xs text-gray-500">Servicos Cadastrados</p>
+                  <p className="text-xs text-gray-500">Serviços Cadastrados</p>
                 </div>
               </div>
             </div>

@@ -454,35 +454,35 @@ function NovaNotaPageContent() {
     return (
       <DashboardLayout>
         {licenseModal}
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/20 to-gray-50 p-4 sm:p-6 lg:p-8">
+        <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
           <div className="max-w-5xl mx-auto">
             <div className="mb-8 relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-[#7C3AED]/10 to-transparent rounded-3xl -z-10"></div>
-              <div className="py-6">
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Nova Nota Fiscal</h1>
-                <p className="text-gray-600">Selecione o cliente para iniciar a emissão</p>
+              <div className="hidden dark:block absolute inset-0 bg-[#7C3AED]/10 rounded-3xl -z-10"></div>
+              <div className="py-6 px-6">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2">Nova Nota Fiscal</h1>
+                <p className="text-muted-foreground">Selecione o cliente para iniciar a emissão</p>
               </div>
             </div>
 
-            <Card className="border-none shadow-xl bg-white/80 backdrop-blur-sm">
-              <CardHeader className="border-b bg-gradient-to-r from-gray-50 to-white">
+            <Card className="border-none shadow-xl">
+              <CardHeader className="border-b dark:bg-muted/40">
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-xl">Selecionar Cliente</CardTitle>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-muted-foreground mt-1">
                       Escolha ou cadastre um novo cliente
                     </p>
                   </div>
-                  <button onClick={async () => { setReloadingClients(true); await reloadClients(); setReloadingClients(false); toast.success('Clientes atualizados') }} disabled={reloadingClients} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar clientes"><RefreshCw className={`w-5 h-5 ${reloadingClients ? 'animate-spin' : ''}`} /></button>
+                  <button onClick={async () => { setReloadingClients(true); await reloadClients(); setReloadingClients(false); toast.success('Clientes atualizados') }} disabled={reloadingClients} className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar clientes"><RefreshCw className={`w-5 h-5 ${reloadingClients ? 'animate-spin' : ''}`} /></button>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4 pt-6">
                 <div className="flex gap-3">
                   <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <Input
                       placeholder="Buscar por nome ou documento..."
-                      className="pl-10 h-12 border-gray-200 focus:border-[#7C3AED] focus:ring-[#7C3AED]"
+                      className="pl-10 h-12 border-border focus:border-[#7C3AED] focus:ring-[#7C3AED]"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -499,11 +499,11 @@ function NovaNotaPageContent() {
                 {loadingClients ? (
                   <div className="flex items-center justify-center py-12">
                     <Loader2 className="w-8 h-8 text-[#7C3AED] animate-spin" />
-                    <span className="ml-3 text-gray-600">Carregando clientes...</span>
+                    <span className="ml-3 text-muted-foreground">Carregando clientes...</span>
                   </div>
                 ) : filteredClients.length === 0 ? (
-                  <div className="text-center py-12 text-gray-500">
-                    <User className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                  <div className="text-center py-12 text-muted-foreground">
+                    <User className="w-12 h-12 mx-auto mb-3 text-muted-foreground" />
                     <p className="font-medium">Nenhum cliente encontrado</p>
                     <p className="text-sm mt-1">Cadastre um novo cliente para continuar</p>
                   </div>
@@ -513,7 +513,7 @@ function NovaNotaPageContent() {
                       <div
                         key={client.id}
                         onClick={() => handleClientSelect(client, index)}
-                        className="p-5 border-2 border-gray-100 rounded-xl hover:border-[#7C3AED] hover:bg-gradient-to-r hover:from-[#FAF5FF] hover:to-white cursor-pointer transition-all duration-200 group"
+                        className="p-5 border-2 border-border rounded-xl hover:border-[#7C3AED] hover:bg-[#FAF5FF] dark:hover:bg-[#7C3AED]/10 cursor-pointer transition-all duration-200 group"
                       >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
@@ -521,17 +521,17 @@ function NovaNotaPageContent() {
                               {client.companyName.charAt(0)}
                             </div>
                             <div>
-                              <p className="font-semibold text-gray-900 group-hover:text-[#7C3AED] transition-colors">
+                              <p className="font-semibold text-foreground group-hover:text-[#7C3AED] transition-colors">
                                 {client.companyName}
                               </p>
-                              <p className="text-sm text-gray-600">
+                              <p className="text-sm text-muted-foreground">
                                 {client.documentType}: {client.cpfCnpj}
                               </p>
                             </div>
                           </div>
                           <button
                             onClick={(e) => handleEditClient(client, e)}
-                            className="p-2 rounded-lg text-gray-400 hover:text-[#7C3AED] hover:bg-[#FAF5FF] transition-colors sm:opacity-0 sm:group-hover:opacity-100"
+                            className="p-2 rounded-lg text-muted-foreground hover:text-[#7C3AED] hover:bg-[#FAF5FF] dark:hover:bg-[#7C3AED]/10 transition-colors sm:opacity-0 sm:group-hover:opacity-100"
                             title="Editar cliente"
                           >
                             <Pencil className="w-4 h-4" />
@@ -551,8 +551,8 @@ function NovaNotaPageContent() {
               {/* Header */}
               <div className="px-8 pt-8 pb-4">
                 <DialogHeader>
-                  <DialogTitle className="text-xl font-bold text-gray-900">{editingClientId ? 'Editar Cliente' : 'Novo Cliente'}</DialogTitle>
-                  <DialogDescription className="text-gray-500">
+                  <DialogTitle className="text-xl font-bold text-foreground">{editingClientId ? 'Editar Cliente' : 'Novo Cliente'}</DialogTitle>
+                  <DialogDescription className="text-muted-foreground">
                     {editingClientId ? 'Atualize os dados do cliente' : 'Preencha os dados do cliente para cadastrá-lo no sistema'}
                   </DialogDescription>
                 </DialogHeader>
@@ -561,24 +561,24 @@ function NovaNotaPageContent() {
               <div className="px-8 pb-8 space-y-6">
                 {/* Dados Pessoais */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Dados Pessoais</h3>
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Dados Pessoais</h3>
 
                   <div className="space-y-1.5">
-                    <Label className="text-sm text-gray-700">Razão Social / Nome Completo</Label>
+                    <Label className="text-sm text-foreground">Razão Social / Nome Completo</Label>
                     <Input
                       value={newClientData.razaoSocial}
                       onChange={(e) =>
                         setNewClientData({ ...newClientData, razaoSocial: e.target.value })
                       }
                       placeholder="Digite o nome completo ou razão social"
-                      className="h-11 bg-white border-gray-300"
+                      className="h-11 bg-card border-border"
                       aria-invalid={!!clientErrors.razaoSocial}
                     />
                     {clientErrors.razaoSocial && <p className="text-sm text-red-500">{clientErrors.razaoSocial}</p>}
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-sm text-gray-700">Tipo de Documento</Label>
+                    <Label className="text-sm text-foreground">Tipo de Documento</Label>
                     <div className="flex gap-3">
                       <button
                         type="button"
@@ -586,7 +586,7 @@ function NovaNotaPageContent() {
                         className={`flex-1 h-11 rounded-lg border-2 font-medium text-sm transition-all ${
                           newClientData.documentType === 'CPF'
                             ? 'border-[#7C3AED] bg-[#FAF5FF] text-[#7C3AED]'
-                            : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                            : 'border-border bg-card text-muted-foreground hover:border-border'
                         }`}
                       >
                         CPF - Pessoa Física
@@ -597,7 +597,7 @@ function NovaNotaPageContent() {
                         className={`flex-1 h-11 rounded-lg border-2 font-medium text-sm transition-all ${
                           newClientData.documentType === 'CNPJ'
                             ? 'border-[#7C3AED] bg-[#FAF5FF] text-[#7C3AED]'
-                            : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                            : 'border-border bg-card text-muted-foreground hover:border-border'
                         }`}
                       >
                         CNPJ - Pessoa Jurídica
@@ -607,7 +607,7 @@ function NovaNotaPageContent() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <Label className="text-sm text-gray-700">{newClientData.documentType}</Label>
+                      <Label className="text-sm text-foreground">{newClientData.documentType}</Label>
                       <Input
                         inputMode="numeric"
                         value={
@@ -629,13 +629,13 @@ function NovaNotaPageContent() {
                             ? '000.000.000-00'
                             : '00.000.000/0000-00'
                         }
-                        className="h-11 bg-white border-gray-300"
+                        className="h-11 bg-card border-border"
                         aria-invalid={!!clientErrors.document}
                       />
                       {clientErrors.document && <p className="text-sm text-red-500">{clientErrors.document}</p>}
                     </div>
                     <div className="space-y-1.5">
-                      <Label className="text-sm text-gray-700">Email</Label>
+                      <Label className="text-sm text-foreground">Email</Label>
                       <Input
                         type="email"
                         value={newClientData.email}
@@ -643,7 +643,7 @@ function NovaNotaPageContent() {
                           setNewClientData({ ...newClientData, email: e.target.value })
                         }
                         placeholder="email@exemplo.com"
-                        className="h-11 bg-white border-gray-300"
+                        className="h-11 bg-card border-border"
                         aria-invalid={!!clientErrors.email}
                       />
                       {clientErrors.email && <p className="text-sm text-red-500">{clientErrors.email}</p>}
@@ -651,7 +651,7 @@ function NovaNotaPageContent() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-sm text-gray-700">Telefone</Label>
+                    <Label className="text-sm text-foreground">Telefone</Label>
                     <Input
                       inputMode="numeric"
                       value={formatPhone(newClientData.phone ?? '')}
@@ -659,7 +659,7 @@ function NovaNotaPageContent() {
                         setNewClientData({ ...newClientData, phone: extractPhoneDigits(e.target.value) })
                       }
                       placeholder="(00) 00000-0000"
-                      className="h-11 bg-white border-gray-300 max-w-xs"
+                      className="h-11 bg-card border-border max-w-xs"
                       aria-invalid={!!clientErrors.phone}
                     />
                     {clientErrors.phone && <p className="text-sm text-red-500">{clientErrors.phone}</p>}
@@ -667,15 +667,15 @@ function NovaNotaPageContent() {
                 </div>
 
                 {/* Divider */}
-                <div className="border-t border-gray-100" />
+                <div className="border-t border-border" />
 
                 {/* Endereço */}
                 <div className="space-y-4">
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Endereço</h3>
+                  <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Endereço</h3>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="space-y-1.5">
-                      <Label className="text-sm text-gray-700">CEP</Label>
+                      <Label className="text-sm text-foreground">CEP</Label>
                       <Input
                         inputMode="numeric"
                         value={formatCep(newClientData.cep ?? '')}
@@ -683,70 +683,70 @@ function NovaNotaPageContent() {
                           setNewClientData({ ...newClientData, cep: extractCepDigits(e.target.value) })
                         }
                         placeholder="00000-000"
-                        className="h-11 bg-white border-gray-300"
+                        className="h-11 bg-card border-border"
                         aria-invalid={!!clientErrors.cep}
                       />
                       {clientErrors.cep && <p className="text-sm text-red-500">{clientErrors.cep}</p>}
                     </div>
                     <div className="space-y-1.5 col-span-2">
-                      <Label className="text-sm text-gray-700">Logradouro</Label>
+                      <Label className="text-sm text-foreground">Logradouro</Label>
                       <Input
                         value={newClientData.logradouro}
                         onChange={(e) =>
                           setNewClientData({ ...newClientData, logradouro: e.target.value })
                         }
                         placeholder="Rua, Avenida..."
-                        className="h-11 bg-white border-gray-300"
+                        className="h-11 bg-card border-border"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <div className="space-y-1.5">
-                      <Label className="text-sm text-gray-700">Número</Label>
+                      <Label className="text-sm text-foreground">Número</Label>
                       <Input
                         value={newClientData.numero}
                         onChange={(e) =>
                           setNewClientData({ ...newClientData, numero: e.target.value })
                         }
                         placeholder="123"
-                        className="h-11 bg-white border-gray-300"
+                        className="h-11 bg-card border-border"
                       />
                     </div>
                     <div className="space-y-1.5 col-span-2">
-                      <Label className="text-sm text-gray-700">Complemento</Label>
+                      <Label className="text-sm text-foreground">Complemento</Label>
                       <Input
                         value={newClientData.complemento}
                         onChange={(e) =>
                           setNewClientData({ ...newClientData, complemento: e.target.value })
                         }
                         placeholder="Apto, Sala..."
-                        className="h-11 bg-white border-gray-300"
+                        className="h-11 bg-card border-border"
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label className="text-sm text-gray-700">Bairro</Label>
+                      <Label className="text-sm text-foreground">Bairro</Label>
                       <Input
                         value={newClientData.bairro}
                         onChange={(e) =>
                           setNewClientData({ ...newClientData, bairro: e.target.value })
                         }
                         placeholder="Nome do bairro"
-                        className="h-11 bg-white border-gray-300"
+                        className="h-11 bg-card border-border"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <Label className="text-sm text-gray-700">Estado</Label>
+                      <Label className="text-sm text-foreground">Estado</Label>
                       <Select
                         value={newClientData.estado}
                         onValueChange={(value) =>
                           setNewClientData({ ...newClientData, estado: value })
                         }
                       >
-                        <SelectTrigger className="h-11 bg-white border-gray-300">
+                        <SelectTrigger className="h-11 bg-card border-border">
                           <SelectValue placeholder="Selecione o estado" />
                         </SelectTrigger>
                         <SelectContent>
@@ -759,7 +759,7 @@ function NovaNotaPageContent() {
                       </Select>
                     </div>
                     <div className="space-y-1.5">
-                      <Label className="text-sm text-gray-700">Município</Label>
+                      <Label className="text-sm text-foreground">Município</Label>
                       <MunicipioAutocomplete
                         value={newClientData.municipio || ''}
                         estado={newClientData.estado || ''}
@@ -772,7 +772,7 @@ function NovaNotaPageContent() {
                 </div>
 
                 {/* Divider */}
-                <div className="border-t border-gray-100" />
+                <div className="border-t border-border" />
 
                 {/* Actions */}
                 <div className="flex gap-3">
@@ -816,7 +816,7 @@ function NovaNotaPageContent() {
     return (
       <DashboardLayout>
         {licenseModal}
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/20 to-gray-50 p-4 sm:p-6 lg:p-8">
+        <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
           <div className="max-w-4xl mx-auto">
             {/* Progress bar */}
             <div className="mb-8">
@@ -834,12 +834,12 @@ function NovaNotaPageContent() {
                   </div>
                   <span className="text-xs sm:text-sm font-medium text-[#7C3AED]">Serviço</span>
                 </div>
-                <div className="w-8 sm:w-20 h-1 bg-gray-200"></div>
+                <div className="w-8 sm:w-20 h-1 bg-muted"></div>
                 <div className="flex items-center gap-1.5 sm:gap-2">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center font-bold text-sm sm:text-base">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-muted text-muted-foreground flex items-center justify-center font-bold text-sm sm:text-base">
                     3
                   </div>
-                  <span className="text-xs sm:text-sm font-medium text-gray-400">Revisão</span>
+                  <span className="text-xs sm:text-sm font-medium text-muted-foreground">Revisão</span>
                 </div>
               </div>
             </div>
@@ -854,8 +854,8 @@ function NovaNotaPageContent() {
                         {selectedClient.companyName.charAt(0)}
                       </div>
                       <div>
-                        <p className="font-bold text-gray-900">{selectedClient.companyName}</p>
-                        <p className="text-sm text-gray-500">{selectedClient.cpfCnpj}</p>
+                        <p className="font-bold text-foreground">{selectedClient.companyName}</p>
+                        <p className="text-sm text-muted-foreground">{selectedClient.cpfCnpj}</p>
                       </div>
                     </div>
                     <Button
@@ -873,7 +873,7 @@ function NovaNotaPageContent() {
               <Card className="border-none shadow-md mb-6 border-l-4 border-l-amber-400">
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between">
-                    <p className="text-sm text-gray-500">Cliente não encontrado. Selecione outro cliente.</p>
+                    <p className="text-sm text-muted-foreground">Cliente não encontrado. Selecione outro cliente.</p>
                     <Button
                       variant="outline"
                       size="sm"
@@ -891,19 +891,19 @@ function NovaNotaPageContent() {
             <Card className="border-none shadow-md mb-6">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-1">
-                  <h3 className="text-lg font-bold text-gray-900">Serviço</h3>
-                  <button onClick={async () => { setReloadingServices(true); await reloadServices(); setReloadingServices(false); toast.success('Serviços atualizados') }} disabled={reloadingServices} className="p-2 rounded-lg hover:bg-gray-100 text-gray-500 hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar serviços"><RefreshCw className={`w-4 h-4 ${reloadingServices ? 'animate-spin' : ''}`} /></button>
+                  <h3 className="text-lg font-bold text-foreground">Serviço</h3>
+                  <button onClick={async () => { setReloadingServices(true); await reloadServices(); setReloadingServices(false); toast.success('Serviços atualizados') }} disabled={reloadingServices} className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-[#7C3AED] transition-colors disabled:opacity-50" title="Recarregar serviços"><RefreshCw className={`w-4 h-4 ${reloadingServices ? 'animate-spin' : ''}`} /></button>
                 </div>
-                <p className="text-sm text-gray-500 mb-4">Selecione o serviço prestado</p>
+                <p className="text-sm text-muted-foreground mb-4">Selecione o serviço prestado</p>
 
                 {loadingServices ? (
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="w-6 h-6 text-[#7C3AED] animate-spin" />
-                    <span className="ml-3 text-gray-500 text-sm">Carregando serviços...</span>
+                    <span className="ml-3 text-muted-foreground text-sm">Carregando serviços...</span>
                   </div>
                 ) : !services || services.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <FileText className="w-10 h-10 mx-auto mb-2 text-gray-300" />
+                  <div className="text-center py-8 text-muted-foreground">
+                    <FileText className="w-10 h-10 mx-auto mb-2 text-muted-foreground" />
                     <p className="font-medium text-sm">Nenhum serviço cadastrado</p>
                     <Button
                       type="button"
@@ -927,32 +927,32 @@ function NovaNotaPageContent() {
                         }}
                         className={`w-full text-left flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${
                           selectedService === service.id
-                            ? 'border-[#7C3AED] bg-[#FAF5FF]'
-                            : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                            ? 'border-[#7C3AED] bg-[#FAF5FF] dark:bg-[#7C3AED]/20'
+                            : 'border-border hover:border-muted-foreground/40 hover:bg-accent/40'
                         }`}
                       >
                         <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
                           selectedService === service.id
                             ? 'border-[#7C3AED] bg-[#7C3AED]'
-                            : 'border-gray-300'
+                            : 'border-border'
                         }`}>
                           {selectedService === service.id && <Check className="w-3 h-3 text-white" />}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className={`font-medium ${selectedService === service.id ? 'text-[#7C3AED]' : 'text-gray-900'}`}>
+                          <p className={`font-medium ${selectedService === service.id ? 'text-[#7C3AED] dark:text-[#C4B5FD]' : 'text-foreground'}`}>
                             {service.name}
                           </p>
                           {service.description && (
-                            <p className="text-sm text-gray-500 truncate">{service.description}</p>
+                            <p className={`text-sm truncate ${selectedService === service.id ? 'text-foreground/80' : 'text-muted-foreground'}`}>{service.description}</p>
                           )}
                         </div>
                         <div className="flex flex-col items-end flex-shrink-0">
                           {service.defaultValue && service.defaultValue > 0 ? (
-                            <span className={`text-sm font-semibold ${selectedService === service.id ? 'text-[#7C3AED]' : 'text-gray-900'}`}>
+                            <span className={`text-sm font-semibold ${selectedService === service.id ? 'text-[#7C3AED] dark:text-[#C4B5FD]' : 'text-foreground'}`}>
                               {service.defaultValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                             </span>
                           ) : null}
-                          <span className="text-xs text-gray-400">{service.cnae}</span>
+                          <span className={`text-xs ${selectedService === service.id ? 'text-foreground/60' : 'text-muted-foreground'}`}>{service.cnae}</span>
                         </div>
                       </button>
                     ))}
@@ -964,13 +964,13 @@ function NovaNotaPageContent() {
             {/* Value */}
             <Card className="border-none shadow-md mb-6">
               <CardContent className="p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Valor do Serviço</h3>
+                <h3 className="text-lg font-bold text-foreground mb-4">Valor do Serviço</h3>
                 <div className="max-w-sm">
                   <Input
                     value={formatMoney(serviceValue)}
                     onChange={(e) => setServiceValue(extractMoneyDigits(e.target.value))}
                     placeholder="R$ 0,00"
-                    className="h-14 text-xl font-bold bg-white border-gray-300"
+                    className="h-14 text-xl font-bold bg-card border-border"
                   />
                 </div>
               </CardContent>
@@ -981,8 +981,8 @@ function NovaNotaPageContent() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="text-lg font-bold text-gray-900">ISS Retido na Fonte?</h3>
-                    <p className="text-sm text-gray-500 mt-0.5">Ative se o ISS será retido pelo tomador</p>
+                    <h3 className="text-lg font-bold text-foreground">ISS Retido na Fonte?</h3>
+                    <p className="text-sm text-muted-foreground mt-0.5">Ative se o ISS será retido pelo tomador</p>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
@@ -991,17 +991,17 @@ function NovaNotaPageContent() {
                       onChange={(e) => setIssRetido(e.target.checked)}
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:border-gray-300 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#7C3AED]"></div>
+                    <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-card after:border after:border-border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#7C3AED]"></div>
                   </label>
                 </div>
 
                 {issRetido && (
-                  <div className="mt-6 pt-6 border-t border-gray-100 space-y-5">
+                  <div className="mt-6 pt-6 border-t border-border space-y-5">
                     {/* Responsável pela Retenção */}
                     <div className="space-y-2">
-                      <Label className="text-sm font-semibold text-gray-700">Responsável pela Retenção</Label>
+                      <Label className="text-sm font-semibold text-foreground">Responsável pela Retenção</Label>
                       <Select value={responsavelRetencao} onValueChange={setResponsavelRetencao}>
-                        <SelectTrigger className="h-11 bg-white border-gray-300">
+                        <SelectTrigger className="h-11 bg-card border-border">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -1013,23 +1013,23 @@ function NovaNotaPageContent() {
 
                     {/* Alíquota ISS */}
                     <div className="space-y-2">
-                      <Label className="text-sm font-semibold text-gray-700">Alíquota ISS (%)</Label>
+                      <Label className="text-sm font-semibold text-foreground">Alíquota ISS (%)</Label>
                       <Input
                         value={formatPercent(aliquotaIss)}
                         onChange={(e) => setAliquotaIss(extractMoneyDigits(e.target.value))}
                         placeholder="0,00%"
-                        className="h-11 bg-white border-gray-300 max-w-xs"
+                        className="h-11 bg-card border-border max-w-xs"
                       />
                     </div>
 
                     {/* Valor Total Retido */}
                     <div className="space-y-2">
-                      <Label className="text-sm font-semibold text-gray-700">Valor Total Retido</Label>
+                      <Label className="text-sm font-semibold text-foreground">Valor Total Retido</Label>
                       <Input
                         value={formatMoney(valorTotalRetido)}
                         onChange={(e) => setValorTotalRetido(extractMoneyDigits(e.target.value))}
                         placeholder="R$ 0,00"
-                        className="h-11 bg-white border-gray-300 max-w-xs"
+                        className="h-11 bg-card border-border max-w-xs"
                       />
                     </div>
                   </div>
@@ -1042,7 +1042,7 @@ function NovaNotaPageContent() {
               <Button
                 variant="outline"
                 onClick={() => setStep('clients')}
-                className="flex-1 h-12 border-gray-300 hover:bg-gray-50 font-semibold"
+                className="flex-1 h-12 border-border hover:bg-background font-semibold"
               >
                 Voltar
               </Button>
@@ -1067,7 +1067,7 @@ function NovaNotaPageContent() {
     return (
       <DashboardLayout>
         {licenseModal}
-        <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/20 to-gray-50 p-4 sm:p-6 lg:p-8">
+        <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto">
             {/* Progress bar */}
             <div className="mb-8">
@@ -1097,12 +1097,12 @@ function NovaNotaPageContent() {
 
             {/* Header */}
             <div className="mb-8 relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-[#7C3AED]/10 to-transparent rounded-3xl -z-10"></div>
-              <div className="py-6">
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
+              <div className="hidden dark:block absolute inset-0 bg-[#7C3AED]/10 rounded-3xl -z-10"></div>
+              <div className="py-6 px-6">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-2">
                   Revisão da Nota Fiscal
                 </h1>
-                <p className="text-gray-600">
+                <p className="text-muted-foreground">
                   Confira todos os dados antes de emitir a NFS-e
                 </p>
               </div>
@@ -1114,7 +1114,7 @@ function NovaNotaPageContent() {
                 {/* Client Info */}
                 <Card className="border-none shadow-xl overflow-hidden">
                   <div className="h-2 bg-gradient-to-r from-blue-500 to-blue-600"></div>
-                  <CardHeader className="bg-gradient-to-r from-blue-50 to-white border-b">
+                  <CardHeader className="bg-blue-50 dark:bg-blue-950/30 border-b">
                     <CardTitle className="text-xl flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-lg">
                         <User className="w-6 h-6 text-white" />
@@ -1129,26 +1129,26 @@ function NovaNotaPageContent() {
                           {selectedClient?.companyName.charAt(0)}
                         </div>
                         <div className="flex-1">
-                          <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                          <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
                             Nome/Razão Social
                           </p>
-                          <p className="font-bold text-gray-900 text-xl mb-2">
+                          <p className="font-bold text-foreground text-xl mb-2">
                             {selectedClient?.companyName}
                           </p>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
                                 Documento
                               </p>
-                              <p className="font-medium text-gray-900">
+                              <p className="font-medium text-foreground">
                                 {selectedClient?.documentType}: {selectedClient?.cpfCnpj}
                               </p>
                             </div>
                             <div>
-                              <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                              <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
                                 Email
                               </p>
-                              <p className="font-medium text-gray-900">
+                              <p className="font-medium text-foreground">
                                 {selectedClient?.email || 'Não informado'}
                               </p>
                             </div>
@@ -1157,10 +1157,10 @@ function NovaNotaPageContent() {
                       </div>
                       {selectedClient?.address && (
                         <div className="pt-4 border-t">
-                          <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">
+                          <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
                             Endereço Completo
                           </p>
-                          <p className="font-medium text-gray-900">
+                          <p className="font-medium text-foreground">
                             {[
                               selectedClient.address.logradouro,
                               selectedClient.address.numero,
@@ -1180,7 +1180,7 @@ function NovaNotaPageContent() {
                 {/* Service Info */}
                 <Card className="border-none shadow-xl overflow-hidden">
                   <div className="h-2 bg-gradient-to-r from-green-500 to-emerald-600"></div>
-                  <CardHeader className="bg-gradient-to-r from-green-50 to-white border-b">
+                  <CardHeader className="bg-green-50 dark:bg-green-950/30 border-b">
                     <CardTitle className="text-xl flex items-center gap-3">
                       <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg">
                         <FileText className="w-6 h-6 text-white" />
@@ -1191,22 +1191,22 @@ function NovaNotaPageContent() {
                   <CardContent className="p-6">
                     <div className="space-y-5">
                       <div>
-                        <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">
+                        <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
                           Serviço Prestado
                         </p>
-                        <p className="font-bold text-gray-900 text-lg mb-2">
+                        <p className="font-bold text-foreground text-lg mb-2">
                           {selectedServiceData?.name}
                         </p>
                         <div className="grid grid-cols-2 gap-3">
-                          <div className="bg-gray-50 p-3 rounded-lg">
-                            <p className="text-xs text-gray-500 mb-1">Código</p>
-                            <p className="font-semibold text-gray-900">
+                          <div className="bg-background p-3 rounded-lg">
+                            <p className="text-xs text-muted-foreground mb-1">Código</p>
+                            <p className="font-semibold text-foreground">
                               {selectedServiceData?.cTribNac}
                             </p>
                           </div>
-                          <div className="bg-gray-50 p-3 rounded-lg">
-                            <p className="text-xs text-gray-500 mb-1">CNAE</p>
-                            <p className="font-semibold text-gray-900">
+                          <div className="bg-background p-3 rounded-lg">
+                            <p className="text-xs text-muted-foreground mb-1">CNAE</p>
+                            <p className="font-semibold text-foreground">
                               {selectedServiceData?.cnae}
                             </p>
                           </div>
@@ -1216,30 +1216,30 @@ function NovaNotaPageContent() {
                       {issRetido && (
                         <div className="grid grid-cols-2 gap-4 pt-4 border-t">
                           <div>
-                            <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">
+                            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
                               ISS Retido
                             </p>
-                            <p className="font-semibold text-gray-900">Sim</p>
+                            <p className="font-semibold text-foreground">Sim</p>
                           </div>
                           <div>
-                            <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">
+                            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
                               Responsável
                             </p>
-                            <p className="font-semibold text-gray-900">
+                            <p className="font-semibold text-foreground">
                               {responsavelRetencao === 'TOMADOR' ? 'Tomador' : 'Intermediário'}
                             </p>
                           </div>
                           <div>
-                            <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">
+                            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
                               Alíquota ISS
                             </p>
-                            <p className="font-semibold text-gray-900">{formatPercent(aliquotaIss) || '0%'}</p>
+                            <p className="font-semibold text-foreground">{formatPercent(aliquotaIss) || '0%'}</p>
                           </div>
                           <div>
-                            <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">
+                            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
                               Valor Retido
                             </p>
-                            <p className="font-semibold text-gray-900">{formatMoney(valorTotalRetido) || 'R$ 0,00'}</p>
+                            <p className="font-semibold text-foreground">{formatMoney(valorTotalRetido) || 'R$ 0,00'}</p>
                           </div>
                         </div>
                       )}
@@ -1248,7 +1248,7 @@ function NovaNotaPageContent() {
                 </Card>
 
                 {/* Send Copy Option */}
-                <Card className="border-none shadow-lg bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 overflow-hidden">
+                <Card className="border-none shadow-lg bg-amber-50 dark:bg-amber-950/30 border-2 border-amber-200 dark:border-amber-700/40 overflow-hidden">
                   <CardContent className="p-6">
                     <div className="flex items-start gap-4">
                       <div className="flex items-center h-6">
@@ -1263,11 +1263,11 @@ function NovaNotaPageContent() {
                       <div className="flex-1">
                         <Label
                           htmlFor="send-copy"
-                          className="cursor-pointer font-bold text-gray-900 text-base mb-1 block"
+                          className="cursor-pointer font-bold text-foreground text-base mb-1 block"
                         >
                           Enviar cópia por email
                         </Label>
-                        <p className="text-sm text-gray-700">
+                        <p className="text-sm text-foreground">
                           Uma cópia da NFS-e será enviada automaticamente para{' '}
                           <span className="font-semibold">
                             {selectedClient?.email || 'o email do cliente'}
@@ -1294,12 +1294,12 @@ function NovaNotaPageContent() {
                   </CardHeader>
                   <CardContent className="p-6 space-y-4">
                     <div className="space-y-4">
-                      <div className="flex justify-between items-center pb-4 border-b-2 border-gray-200">
+                      <div className="flex justify-between items-center pb-4 border-b-2 border-border">
                         <div>
-                          <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                          <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
                             Valor Bruto
                           </p>
-                          <p className="font-bold text-gray-900 text-lg">
+                          <p className="font-bold text-foreground text-lg">
                             {formatMoney(serviceValue) || 'R$ 0,00'}
                           </p>
                         </div>
@@ -1322,23 +1322,23 @@ function NovaNotaPageContent() {
                       )}
 
                       <div className="bg-gradient-to-br from-[#7C3AED]/10 to-[#6D28D9]/5 p-5 rounded-xl border-2 border-[#7C3AED]/20">
-                        <p className="text-xs text-gray-600 uppercase tracking-wide mb-2 font-semibold">
+                        <p className="text-xs text-muted-foreground uppercase tracking-wide mb-2 font-semibold">
                           Valor Líquido
                         </p>
                         <p className="text-3xl font-bold text-[#7C3AED]">
                           {numericValue > 0 ? (parseFloat(netValue)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00'}
                         </p>
-                        <p className="text-xs text-gray-600 mt-2">
+                        <p className="text-xs text-muted-foreground mt-2">
                           Valor a receber após impostos
                         </p>
                       </div>
                     </div>
 
-                    <div className="pt-4 space-y-3 border-t-2 border-gray-200">
+                    <div className="pt-4 space-y-3 border-t-2 border-border">
                       <Button
                         variant="outline"
                         onClick={() => setStep('service')}
-                        className="w-full h-12 border-2 border-gray-300 hover:bg-gray-50 font-semibold"
+                        className="w-full h-12 border-2 border-border hover:bg-background font-semibold"
                       >
                         Editar Dados
                       </Button>
@@ -1364,17 +1364,17 @@ function NovaNotaPageContent() {
                 </Card>
 
                 {/* Info Box */}
-                <Card className="border-none shadow-lg bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200">
+                <Card className="border-none shadow-lg bg-blue-50 dark:bg-blue-950/30 border-2 border-blue-200 dark:border-blue-700/40">
                   <CardContent className="p-5">
                     <div className="flex gap-3">
                       <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg">
                         <span className="text-white text-xl font-bold">ℹ</span>
                       </div>
                       <div>
-                        <p className="font-bold text-gray-900 mb-2 text-base">
+                        <p className="font-bold text-foreground mb-2 text-base">
                           Atenção
                         </p>
-                        <p className="text-sm text-gray-700 leading-relaxed">
+                        <p className="text-sm text-foreground leading-relaxed">
                           Após a emissão, a nota fiscal não poderá ser editada.
                           Certifique-se de que todas as informações estão corretas antes
                           de prosseguir.
@@ -1402,7 +1402,7 @@ function NovaNotaPageContent() {
                 <div className="w-20 h-20 bg-[#F3E8FF] rounded-full flex items-center justify-center mb-6">
                   <Check className="w-10 h-10 text-[#7C3AED]" />
                 </div>
-                <p className="text-gray-600 mb-6">
+                <p className="text-muted-foreground mb-6">
                   {emittedNoteNumber
                     ? `NFS-e N. ${emittedNoteNumber} foi gerada com sucesso`
                     : 'NFS-e foi gerada com sucesso'}
@@ -1436,9 +1436,9 @@ function NovaNotaPageContent() {
 function NovaNotaPageFallback() {
   return (
     <DashboardLayout>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-purple-50/20 to-gray-50 p-8">
+      <div className="min-h-screen bg-background p-8">
         <div className="max-w-5xl mx-auto flex items-center justify-center py-20">
-          <div className="flex items-center gap-3 text-gray-600">
+          <div className="flex items-center gap-3 text-muted-foreground">
             <Loader2 className="w-6 h-6 text-[#7C3AED] animate-spin" />
             <span>Carregando emissao de nota...</span>
           </div>

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import Sidebar from './Sidebar'
+import { ThemeToggle } from './ThemeToggle'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -38,10 +39,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#7C3AED] mx-auto"></div>
-          <p className="mt-2 text-gray-600">Carregando...</p>
+          <p className="mt-2 text-muted-foreground">Carregando...</p>
         </div>
       </div>
     )
@@ -49,18 +50,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   if (isSigningOut || (!loading && !user)) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#7C3AED] mx-auto"></div>
-          <p className="text-lg font-medium text-gray-700 mt-4">Saindo do sistema...</p>
-          <p className="text-sm text-gray-500 mt-1">Você será redirecionado em instantes</p>
+          <p className="text-lg font-medium text-foreground mt-4">Saindo do sistema...</p>
+          <p className="text-sm text-muted-foreground mt-1">Você será redirecionado em instantes</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-background flex">
       <Sidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
@@ -68,13 +69,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       />
 
       {/* Main content */}
-      <div className="flex-1 lg:ml-0">
+      <div className="flex-1 lg:ml-0 flex flex-col">
         {/* Mobile header */}
-        <header className="bg-white shadow-sm border-b lg:hidden">
+        <header className="bg-card shadow-sm border-b border-border lg:hidden">
           <div className="px-4 h-16 flex items-center">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="text-gray-500 hover:text-gray-700"
+              className="text-muted-foreground hover:text-foreground"
               aria-label="Abrir menu"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -82,7 +83,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               </svg>
             </button>
             <span className="ml-4 text-lg font-semibold text-[#7C3AED]">ClinNota</span>
+            <div className="ml-auto"><ThemeToggle /></div>
           </div>
+        </header>
+
+        {/* Desktop header — invisível no claro, faixa sutil no escuro só pra ancorar o toggle */}
+        <header className="hidden lg:flex h-14 items-center justify-end px-8 dark:bg-card dark:border-b dark:border-border">
+          <ThemeToggle />
         </header>
 
         <main className="flex-1 overflow-auto">
@@ -99,21 +106,21 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
           />
           <div className="flex min-h-screen items-center justify-center p-4">
-            <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md transform transition-all z-[10000]">
+            <div className="relative bg-card text-card-foreground rounded-lg shadow-xl w-full max-w-md transform transition-all z-[10000]">
               <div className="p-6">
-                <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full">
-                  <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 dark:bg-red-950 rounded-full">
+                  <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
                 </div>
                 <div className="mt-4 text-center">
-                  <h3 className="text-lg font-semibold text-gray-900">Confirmar Saída</h3>
-                  <p className="mt-2 text-sm text-gray-600">Tem certeza que deseja sair do sistema?</p>
+                  <h3 className="text-lg font-semibold text-foreground">Confirmar Saída</h3>
+                  <p className="mt-2 text-sm text-muted-foreground">Tem certeza que deseja sair do sistema?</p>
                 </div>
                 <div className="mt-6 flex justify-center space-x-3">
                   <button
                     onClick={() => setShowLogoutModal(false)}
-                    className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                    className="px-4 py-2 text-foreground border border-border rounded-lg hover:bg-accent transition-colors font-medium"
                   >
                     Cancelar
                   </button>

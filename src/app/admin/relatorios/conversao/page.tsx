@@ -86,7 +86,7 @@ export default function RelatorioConversaoPage() {
       value: String(licencasTrial),
       change: "",
       changeType: "positive" as const,
-      detail: "em periodo trial",
+      detail: "em período trial",
       icon: ArrowLeftRight,
       gradient: "from-emerald-500 to-green-500",
       bgGradient: "from-emerald-50 to-green-50",
@@ -111,7 +111,7 @@ export default function RelatorioConversaoPage() {
           <ArrowLeftRight className="w-6 h-6 text-white" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Relatorio de Conversao</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Relatório de Conversao</h1>
           <p className="text-sm text-gray-500">Analise de conversao de trials para planos pagos</p>
         </div>
       </div>

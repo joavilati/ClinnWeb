@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import DashboardLayout from '@/components/DashboardLayout'
 import { Card, CardContent } from '@/components/ui/card'
-import { FileText, Hash, Upload, Briefcase, Lock, ChevronRight } from 'lucide-react'
+import { FileText, Hash, Upload, Briefcase, Lock, Palette, ChevronRight } from 'lucide-react'
 
 const settingsOptions = [
   {
@@ -41,6 +41,13 @@ const settingsOptions = [
     path: '/configuracoes/alterar-senha',
     color: 'bg-red-50 text-red-600',
   },
+  {
+    icon: Palette,
+    title: 'Aparência',
+    description: 'Escolha entre modo claro, escuro ou seguir o sistema',
+    path: '/configuracoes/aparencia',
+    color: 'bg-indigo-50 text-indigo-600',
+  },
 ]
 
 export default function ConfiguracoesPage() {
@@ -49,8 +56,8 @@ export default function ConfiguracoesPage() {
       <div className="p-4 sm:p-6 lg:p-8">
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Configurações</h1>
-            <p className="text-gray-600 mt-2">Gerencie as configurações do sistema</p>
+            <h1 className="text-3xl font-bold text-foreground">Configurações</h1>
+            <p className="text-muted-foreground mt-2">Gerencie as configurações do sistema</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -58,17 +65,17 @@ export default function ConfiguracoesPage() {
               const Icon = option.icon
               return (
                 <Link key={option.path} href={option.path}>
-                  <Card className="border-none shadow-md cursor-pointer hover:shadow-lg transition-all">
+                  <Card className="border border-border shadow-sm cursor-pointer hover:shadow-md hover:border-muted-foreground/40 transition-all">
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4">
                         <div className={`p-3 rounded-lg ${option.color}`}>
                           <Icon className="w-6 h-6" />
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-semibold text-gray-900 mb-1">{option.title}</h3>
-                          <p className="text-sm text-gray-600">{option.description}</p>
+                          <h3 className="font-semibold text-foreground mb-1">{option.title}</h3>
+                          <p className="text-sm text-muted-foreground">{option.description}</p>
                         </div>
-                        <ChevronRight className="w-5 h-5 text-gray-400 mt-1" />
+                        <ChevronRight className="w-5 h-5 text-muted-foreground mt-1" />
                       </div>
                     </CardContent>
                   </Card>

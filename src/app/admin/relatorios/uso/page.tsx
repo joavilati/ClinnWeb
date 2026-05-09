@@ -34,7 +34,7 @@ const weeklyEmissionData = [
 
 const topCompaniesData = [
   {
-    empresa: "Clinica Saude Total",
+    empresa: "Clínica Saúde Total",
     nfseEmitidas: 87,
     clientes: 234,
     servicos: 12,
@@ -62,7 +62,7 @@ const topCompaniesData = [
     ultimoAcesso: "Hoje, 11:20",
   },
   {
-    empresa: "Nutri Clinica Plus",
+    empresa: "Nutri Clínica Plus",
     nfseEmitidas: 51,
     clientes: 98,
     servicos: 5,
@@ -181,7 +181,7 @@ export default function RelatorioUsoPage() {
           <Activity className="w-6 h-6 text-white" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Relatorio de Uso</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Relatório de Uso</h1>
           <p className="text-sm text-gray-500">Monitoramento de atividade e utilizacao da plataforma</p>
         </div>
       </div>
@@ -263,7 +263,7 @@ export default function RelatorioUsoPage() {
                 <TableHead className="font-semibold text-gray-700">Empresa</TableHead>
                 <TableHead className="font-semibold text-gray-700">NFS-e Emitidas</TableHead>
                 <TableHead className="font-semibold text-gray-700">Clientes</TableHead>
-                <TableHead className="font-semibold text-gray-700">Servicos</TableHead>
+                <TableHead className="font-semibold text-gray-700">Serviços</TableHead>
                 <TableHead className="font-semibold text-gray-700">Ultimo Acesso</TableHead>
               </TableRow>
             </TableHeader>
