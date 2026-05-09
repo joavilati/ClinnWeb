@@ -26,6 +26,7 @@ interface MunicipioAutocompleteProps {
   placeholder?: string
   className?: string
   disabled?: boolean
+  invalid?: boolean
 }
 
 export function MunicipioAutocomplete({
@@ -35,6 +36,7 @@ export function MunicipioAutocomplete({
   placeholder = 'Digite para buscar...',
   className = '',
   disabled = false,
+  invalid = false,
 }: MunicipioAutocompleteProps) {
   const [all, setAll] = useState<Municipality[]>([])
   const [query, setQuery] = useState(value)
@@ -116,6 +118,7 @@ export function MunicipioAutocomplete({
           onKeyDown={handleKeyDown}
           placeholder={!estado ? 'Selecione o estado primeiro' : placeholder}
           disabled={disabled || !estado}
+          aria-invalid={invalid}
           className={`h-11 bg-white border-gray-300 pr-8 ${!estado ? 'opacity-60' : ''}`}
         />
         <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />

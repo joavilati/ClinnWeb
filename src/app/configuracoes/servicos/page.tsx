@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,7 +11,7 @@ import Link from 'next/link'
 import { useApiClient } from '@/hooks/useApiClient'
 import { useCachedData } from '@/hooks/useCachedData'
 import { CACHE_KEYS } from '@/lib/localCache'
-import { formatMoney, extractMoneyDigits } from '@/lib/masks'
+import { formatMoney, extractMoneyDigits, moneyDigitsToNumber } from '@/lib/masks'
 import { toast } from 'sonner'
 import DashboardLayout from '@/components/DashboardLayout'
 
@@ -19,6 +19,7 @@ import DashboardLayout from '@/components/DashboardLayout'
 interface ServiceItem {
   id: string
   name: string
+  description: string
   code: string
   cnae: string
   value: string
@@ -35,6 +36,7 @@ function normalizeServiceList(raw: unknown): ServiceItem[] {
     return {
       id: String(s.id || ''),
       name: String(data.name || data.nome || ''),
+      description: String(data.description || data.descricao || ''),
       code: String(data.ctribNac || data.cTribNac || data.code || ''),
       cnae: String(data.cnae || ''),
       value: data.defaultValue != null ? `R$ ${Number(data.defaultValue).toFixed(2).replace('.', ',')}` : String(data.value || ''),
@@ -50,10 +52,35 @@ export default function ServicosPage() {
   const [reloading, setReloading] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
+    description: '',
     code: '',
     cnae: '',
     value: '',
   })
+
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
+  const validateService = (): Record<string, string> => {
+    const errs: Record<string, string> = {}
+    if (!formData.name.trim()) errs.name = 'Nome é obrigatório'
+    if (!formData.description.trim()) errs.description = 'Descrição é obrigatória'
+    if (!formData.code.replace(/\D/g, '')) errs.code = 'Código de Tributação é obrigatório'
+    if (!formData.cnae.replace(/\D/g, '')) errs.cnae = 'CNAE é obrigatório'
+    return errs
+  }
+
+  useEffect(() => {
+    setErrors(prev => {
+      if (Object.keys(prev).length === 0) return prev
+      const next = { ...prev }
+      let changed = false
+      if (prev.name && formData.name.trim()) { delete next.name; changed = true }
+      if (prev.description && formData.description.trim()) { delete next.description; changed = true }
+      if (prev.code && formData.code.replace(/\D/g, '')) { delete next.code; changed = true }
+      if (prev.cnae && formData.cnae.replace(/\D/g, '')) { delete next.cnae; changed = true }
+      return changed ? next : prev
+    })
+  }, [formData.name, formData.description, formData.code, formData.cnae])
 
   const normalizeServices = useCallback((raw: unknown): ServiceItem[] => {
     return normalizeServiceList(raw)
@@ -70,6 +97,7 @@ export default function ServicosPage() {
       setEditingService(service)
       setFormData({
         name: service.name,
+        description: service.description,
         code: service.code,
         cnae: service.cnae,
         value: extractMoneyDigits(service.value),
@@ -78,11 +106,13 @@ export default function ServicosPage() {
       setEditingService(null)
       setFormData({
         name: '',
+        description: '',
         code: '',
         cnae: '',
         value: '',
       })
     }
+    setErrors({})
     setShowModal(true)
   }
 
@@ -91,24 +121,36 @@ export default function ServicosPage() {
     setEditingService(null)
     setFormData({
       name: '',
+      description: '',
       code: '',
       cnae: '',
       value: '',
     })
+    setErrors({})
   }
 
   const handleSave = async () => {
-    if (!formData.name || !formData.code || !formData.cnae || !formData.value) {
-      toast.error('Preencha todos os campos')
+    const errs = validateService()
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs)
+      toast.error('Preencha os campos obrigatórios')
       return
     }
+    setErrors({})
 
     setLoadingSave(true)
+    const payload = {
+      name: formData.name.trim(),
+      description: formData.description.trim(),
+      cTribNac: formData.code.trim(),
+      cnae: formData.cnae.trim(),
+      defaultValue: moneyDigitsToNumber(formData.value),
+    }
     try {
       if (editingService) {
         const response = await apiFetch(`/api/configuracoes/servicos/${editingService.id}`, {
           method: 'PUT',
-          body: JSON.stringify(formData),
+          body: JSON.stringify(payload),
         })
 
         if (response.ok) {
@@ -120,7 +162,7 @@ export default function ServicosPage() {
       } else {
         const response = await apiFetch(`/api/configuracoes/servicos`, {
           method: 'POST',
-          body: JSON.stringify(formData),
+          body: JSON.stringify(payload),
         })
 
         if (response.ok) {
@@ -268,7 +310,20 @@ export default function ServicosPage() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="Ex: Consulta Médica"
+                  aria-invalid={!!errors.name}
                 />
+                {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Descrição</Label>
+                <Input
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Descrição que aparecerá na nota"
+                  aria-invalid={!!errors.description}
+                />
+                {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -278,7 +333,9 @@ export default function ServicosPage() {
                     value={formData.code}
                     onChange={(e) => setFormData({ ...formData, code: e.target.value })}
                     placeholder="Ex: 0101"
+                    aria-invalid={!!errors.code}
                   />
+                  {errors.code && <p className="text-sm text-red-500">{errors.code}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label>CNAE</Label>
@@ -286,7 +343,9 @@ export default function ServicosPage() {
                     value={formData.cnae}
                     onChange={(e) => setFormData({ ...formData, cnae: e.target.value })}
                     placeholder="Ex: 8630-5/01"
+                    aria-invalid={!!errors.cnae}
                   />
+                  {errors.cnae && <p className="text-sm text-red-500">{errors.cnae}</p>}
                 </div>
               </div>
 

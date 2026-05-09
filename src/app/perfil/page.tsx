@@ -31,14 +31,12 @@ export default function PerfilPage() {
       nomeFantasia: String(data.nomeFantasia || ''),
       cnpj: String(data.cnpj || ''),
       inscricaoMunicipal: String(data.inscricaoMunicipal || ''),
-      regimeTributario: String(data.regimeTributario || ''),
       cnaes: Array.isArray(data.cnaes) ? data.cnaes : [],
       email: String(data.email || ''),
       telefone: String(data.telefone || ''),
       cep: String(data.cep || ''),
       logradouro: String(data.logradouro || ''),
       numero: String(data.numero || ''),
-      complemento: String(data.complemento || ''),
       bairro: String(data.bairro || ''),
       estado: toUF(String(data.uf || data.estado || '')),
       municipio: String(data.cidade || data.municipio || ''),
@@ -57,19 +55,59 @@ export default function PerfilPage() {
     nomeFantasia: '',
     cnpj: '',
     inscricaoMunicipal: '',
-    regimeTributario: '',
     cnaes: [],
     email: '',
     telefone: '',
     cep: '',
     logradouro: '',
     numero: '',
-    complemento: '',
     bairro: '',
     estado: '',
     municipio: '',
     codigoMunicipio: '',
   })
+
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
+  const REQUIRED_FIELDS: { key: keyof ProfileData; label: string }[] = [
+    { key: 'razaoSocial', label: 'Razão Social' },
+    { key: 'nomeFantasia', label: 'Nome Fantasia' },
+    { key: 'cnpj', label: 'CNPJ' },
+    { key: 'telefone', label: 'Telefone' },
+    { key: 'cep', label: 'CEP' },
+    { key: 'logradouro', label: 'Logradouro' },
+    { key: 'numero', label: 'Número' },
+    { key: 'bairro', label: 'Bairro' },
+    { key: 'estado', label: 'Estado' },
+    { key: 'municipio', label: 'Município' },
+  ]
+
+  const validate = (): Record<string, string> => {
+    const errs: Record<string, string> = {}
+    for (const f of REQUIRED_FIELDS) {
+      const v = profileData[f.key]
+      if (typeof v === 'string' && v.trim() === '') {
+        errs[f.key] = `${f.label} é obrigatório`
+      }
+    }
+    return errs
+  }
+
+  useEffect(() => {
+    setErrors(prev => {
+      if (Object.keys(prev).length === 0) return prev
+      const next = { ...prev }
+      let changed = false
+      for (const k of Object.keys(prev)) {
+        const v = profileData[k as keyof ProfileData]
+        if (typeof v === 'string' && v.trim() !== '') {
+          delete next[k]
+          changed = true
+        }
+      }
+      return changed ? next : prev
+    })
+  }, [profileData])
 
   useEffect(() => {
     if (profile) {
@@ -81,18 +119,43 @@ export default function PerfilPage() {
   }, [profile])
 
   const handleSave = async () => {
+    const errs = validate()
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs)
+      toast.error('Preencha os campos obrigatórios')
+      return
+    }
+    setErrors({})
     setIsSaving(true)
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { cnaes, estado, municipio, ...rest } = profileData
-      const payload = { ...rest, uf: estado, cidade: municipio }
+      const payload = {
+        razaoSocial: profileData.razaoSocial,
+        nomeFantasia: profileData.nomeFantasia,
+        cnpj: profileData.cnpj,
+        inscricaoMunicipal: profileData.inscricaoMunicipal,
+        email: profileData.email,
+        telefone: profileData.telefone,
+        cep: profileData.cep,
+        logradouro: profileData.logradouro,
+        numero: profileData.numero,
+        bairro: profileData.bairro,
+        codigoMunicipio: profileData.codigoMunicipio,
+        uf: profileData.estado,
+        cidade: profileData.municipio,
+      }
       const res = await apiFetch('/api/profile', {
         method: 'PUT',
         body: JSON.stringify(payload),
       })
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
-        throw new Error(err.message || 'Erro ao salvar perfil')
+        const message = err.message || err.error || 'Erro ao salvar perfil'
+        const m = String(message).match(/^(\w+) é obrigatório$/)
+        if (m) {
+          const field = m[1] === 'cidade' ? 'municipio' : m[1] === 'uf' ? 'estado' : m[1]
+          setErrors({ [field]: String(message) })
+        }
+        throw new Error(String(message))
       }
       updateCache(profileData)
       toast.success('Perfil atualizado com sucesso!')
@@ -201,10 +264,6 @@ export default function PerfilPage() {
                       <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Inscrição Municipal</p>
                       <p className="font-semibold text-gray-900">{profileData.inscricaoMunicipal || '-'}</p>
                     </div>
-                    <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100 md:col-span-2">
-                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Regime Tributário</p>
-                      <p className="font-semibold text-gray-900">{profileData.regimeTributario || '-'}</p>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -256,10 +315,6 @@ export default function PerfilPage() {
                       <p className="font-semibold text-gray-900">{profileData.logradouro || '-'}{profileData.numero ? `, ${profileData.numero}` : ''}</p>
                     </div>
                     <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100">
-                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Complemento</p>
-                      <p className="font-semibold text-gray-900">{profileData.complemento || '-'}</p>
-                    </div>
-                    <div className="p-4 rounded-xl bg-gray-50/80 border border-gray-100">
                       <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Bairro</p>
                       <p className="font-semibold text-gray-900">{profileData.bairro || '-'}</p>
                     </div>
@@ -303,14 +358,18 @@ export default function PerfilPage() {
                     <Input
                       value={profileData.razaoSocial}
                       onChange={(e) => setProfileData({ ...profileData, razaoSocial: e.target.value })}
+                      aria-invalid={!!errors.razaoSocial}
                     />
+                    {errors.razaoSocial && <p className="text-sm text-red-500">{errors.razaoSocial}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label>Nome Fantasia</Label>
                     <Input
                       value={profileData.nomeFantasia}
                       onChange={(e) => setProfileData({ ...profileData, nomeFantasia: e.target.value })}
+                      aria-invalid={!!errors.nomeFantasia}
                     />
+                    {errors.nomeFantasia && <p className="text-sm text-red-500">{errors.nomeFantasia}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label>CNPJ</Label>
@@ -318,20 +377,15 @@ export default function PerfilPage() {
                       value={formatCnpj(profileData.cnpj)}
                       onChange={(e) => setProfileData({ ...profileData, cnpj: extractCnpjDigits(e.target.value) })}
                       placeholder="00.000.000/0000-00"
+                      aria-invalid={!!errors.cnpj}
                     />
+                    {errors.cnpj && <p className="text-sm text-red-500">{errors.cnpj}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label>Inscrição Municipal</Label>
                     <Input
                       value={profileData.inscricaoMunicipal}
                       onChange={(e) => setProfileData({ ...profileData, inscricaoMunicipal: e.target.value })}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Regime Tributário</Label>
-                    <Input
-                      value={profileData.regimeTributario}
-                      onChange={(e) => setProfileData({ ...profileData, regimeTributario: e.target.value })}
                     />
                   </div>
                 </div>
@@ -360,7 +414,9 @@ export default function PerfilPage() {
                       value={formatPhone(profileData.telefone)}
                       onChange={(e) => setProfileData({ ...profileData, telefone: extractPhoneDigits(e.target.value) })}
                       placeholder="(00) 00000-0000"
+                      aria-invalid={!!errors.telefone}
                     />
+                    {errors.telefone && <p className="text-sm text-red-500">{errors.telefone}</p>}
                   </div>
                 </div>
               </CardContent>
@@ -379,14 +435,18 @@ export default function PerfilPage() {
                       value={formatCep(profileData.cep)}
                       onChange={(e) => setProfileData({ ...profileData, cep: extractCepDigits(e.target.value) })}
                       placeholder="00000-000"
+                      aria-invalid={!!errors.cep}
                     />
+                    {errors.cep && <p className="text-sm text-red-500">{errors.cep}</p>}
                   </div>
                   <div className="space-y-2 col-span-2">
                     <Label>Logradouro</Label>
                     <Input
                       value={profileData.logradouro}
                       onChange={(e) => setProfileData({ ...profileData, logradouro: e.target.value })}
+                      aria-invalid={!!errors.logradouro}
                     />
+                    {errors.logradouro && <p className="text-sm text-red-500">{errors.logradouro}</p>}
                   </div>
                 </div>
 
@@ -396,14 +456,9 @@ export default function PerfilPage() {
                     <Input
                       value={profileData.numero}
                       onChange={(e) => setProfileData({ ...profileData, numero: e.target.value })}
+                      aria-invalid={!!errors.numero}
                     />
-                  </div>
-                  <div className="space-y-2 col-span-2">
-                    <Label>Complemento</Label>
-                    <Input
-                      value={profileData.complemento}
-                      onChange={(e) => setProfileData({ ...profileData, complemento: e.target.value })}
-                    />
+                    {errors.numero && <p className="text-sm text-red-500">{errors.numero}</p>}
                   </div>
                 </div>
 
@@ -413,7 +468,9 @@ export default function PerfilPage() {
                     <Input
                       value={profileData.bairro}
                       onChange={(e) => setProfileData({ ...profileData, bairro: e.target.value })}
+                      aria-invalid={!!errors.bairro}
                     />
+                    {errors.bairro && <p className="text-sm text-red-500">{errors.bairro}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label>Estado</Label>
@@ -421,7 +478,7 @@ export default function PerfilPage() {
                       value={profileData.estado}
                       onValueChange={(value) => setProfileData({ ...profileData, estado: value })}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger aria-invalid={!!errors.estado}>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -430,6 +487,7 @@ export default function PerfilPage() {
                         ))}
                       </SelectContent>
                     </Select>
+                    {errors.estado && <p className="text-sm text-red-500">{errors.estado}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label>Município</Label>
@@ -437,7 +495,9 @@ export default function PerfilPage() {
                       value={profileData.municipio}
                       estado={profileData.estado}
                       onChange={(name, code) => setProfileData({ ...profileData, municipio: name, codigoMunicipio: code })}
+                      invalid={!!errors.municipio}
                     />
+                    {errors.municipio && <p className="text-sm text-red-500">{errors.municipio}</p>}
                   </div>
                 </div>
 

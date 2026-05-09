@@ -84,6 +84,7 @@ export interface CreateClientRequest {
   bairro?: string
   estado?: string
   municipio?: string
+  codigoMunicipio?: string
 }
 
 // ===== Service =====
@@ -138,14 +139,12 @@ export interface ProfileData {
   nomeFantasia: string
   cnpj: string
   inscricaoMunicipal: string
-  regimeTributario: string
   cnaes: string[]
   email: string
   telefone: string
   cep: string
   logradouro: string
   numero: string
-  complemento: string
   bairro: string
   estado: string
   municipio: string

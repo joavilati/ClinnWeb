@@ -31,7 +31,8 @@ import { normalizeClients, normalizeServices } from '@/lib/normalizers'
 import { CACHE_KEYS, removeCache } from '@/lib/localCache'
 import { isLicenseActive } from '@/lib/licenseGuard'
 import { LicenseExpiredModal } from '@/components/LicenseExpiredModal'
-import { formatMoney, extractMoneyDigits, moneyDigitsToNumber, numberToMoneyDigits, formatPercent, percentDigitsToNumber } from '@/lib/masks'
+import { formatMoney, extractMoneyDigits, moneyDigitsToNumber, numberToMoneyDigits, formatPercent, percentDigitsToNumber, formatPhone, extractPhoneDigits, formatCnpj, extractCnpjDigits, formatCpf, extractCpfDigits, formatCep, extractCepDigits } from '@/lib/masks'
+import { isValidCpf, isValidCnpj } from '@/lib/validators'
 import { ESTADOS } from '@/lib/constants'
 import { MunicipioAutocomplete } from '@/components/MunicipioAutocomplete'
 
@@ -46,6 +47,24 @@ const avatarColors = [
 
 function getAvatarColor(index: number): string {
   return avatarColors[index % avatarColors.length]
+}
+
+function toClientPayload(c: CreateClientRequest) {
+  return {
+    cpf_cnpj: c.document.replace(/\D/g, ''),
+    company_name: c.razaoSocial.trim(),
+    municipalRegistration: '',
+    email: (c.email ?? '').trim(),
+    postal_code: (c.cep ?? '').replace(/\D/g, ''),
+    cityCode: (c.codigoMunicipio ?? '').replace(/\D/g, ''),
+    address: (c.logradouro ?? '').trim(),
+    number: (c.numero ?? '').trim(),
+    complement: (c.complemento ?? '').trim(),
+    neighborhood: (c.bairro ?? '').trim(),
+    state: (c.estado ?? '').trim().toUpperCase(),
+    city: (c.municipio ?? '').trim(),
+    phone: (c.phone ?? '').replace(/\D/g, ''),
+  }
 }
 
 function NovaNotaPageContent() {
@@ -120,6 +139,60 @@ function NovaNotaPageContent() {
     estado: '',
     municipio: '',
   })
+
+  const [clientErrors, setClientErrors] = useState<Record<string, string>>({})
+
+  const validateClient = (): Record<string, string> => {
+    const errs: Record<string, string> = {}
+    if (!newClientData.razaoSocial.trim()) errs.razaoSocial = 'Razão Social é obrigatória'
+    const docDigits = newClientData.document.replace(/\D/g, '')
+    const isCpf = newClientData.documentType === 'CPF'
+    if (!docDigits) {
+      errs.document = `${newClientData.documentType} é obrigatório`
+    } else if (isCpf ? !isValidCpf(docDigits) : !isValidCnpj(docDigits)) {
+      errs.document = `${newClientData.documentType} inválido`
+    }
+    const phoneDigits = (newClientData.phone ?? '').replace(/\D/g, '')
+    if (phoneDigits && (phoneDigits.length < 10 || phoneDigits.length > 11)) {
+      errs.phone = 'Telefone inválido'
+    }
+    const cepDigits = (newClientData.cep ?? '').replace(/\D/g, '')
+    if (cepDigits && cepDigits.length !== 8) {
+      errs.cep = 'CEP inválido'
+    }
+    const email = newClientData.email ?? ''
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errs.email = 'Email inválido'
+    }
+    return errs
+  }
+
+  useEffect(() => {
+    setClientErrors(prev => {
+      if (Object.keys(prev).length === 0) return prev
+      const next = { ...prev }
+      let changed = false
+      if (prev.razaoSocial && newClientData.razaoSocial.trim()) { delete next.razaoSocial; changed = true }
+      if (prev.document) {
+        const d = newClientData.document.replace(/\D/g, '')
+        const valid = newClientData.documentType === 'CPF' ? isValidCpf(d) : isValidCnpj(d)
+        if (valid) { delete next.document; changed = true }
+      }
+      if (prev.phone) {
+        const d = (newClientData.phone ?? '').replace(/\D/g, '')
+        if (!d || (d.length >= 10 && d.length <= 11)) { delete next.phone; changed = true }
+      }
+      if (prev.cep) {
+        const d = (newClientData.cep ?? '').replace(/\D/g, '')
+        if (!d || d.length === 8) { delete next.cep; changed = true }
+      }
+      if (prev.email) {
+        const e = newClientData.email ?? ''
+        if (!e || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)) { delete next.email; changed = true }
+      }
+      return changed ? next : prev
+    })
+  }, [newClientData.razaoSocial, newClientData.document, newClientData.documentType, newClientData.phone, newClientData.cep, newClientData.email])
 
   // ---------- Duplicate handling ----------
   const isDuplicate = searchParams.get('duplicate') === 'true'
@@ -257,15 +330,18 @@ function NovaNotaPageContent() {
   }
 
   const handleSaveNewClient = async () => {
-    if (!newClientData.razaoSocial || !newClientData.document) {
-      toast.error('Preencha o nome e documento do cliente')
+    const errs = validateClient()
+    if (Object.keys(errs).length > 0) {
+      setClientErrors(errs)
+      toast.error('Preencha os campos obrigatórios')
       return
     }
+    setClientErrors({})
     setSavingClient(true)
     try {
       const res = await apiFetch('/api/clients', {
         method: 'POST',
-        body: JSON.stringify(newClientData),
+        body: JSON.stringify(toClientPayload(newClientData)),
       })
 
       if (!res.ok) {
@@ -320,15 +396,19 @@ function NovaNotaPageContent() {
   }
 
   const handleSaveEditClient = async () => {
-    if (!editingClientId || !newClientData.razaoSocial || !newClientData.document) {
-      toast.error('Preencha o nome e documento do cliente')
+    if (!editingClientId) return
+    const errs = validateClient()
+    if (Object.keys(errs).length > 0) {
+      setClientErrors(errs)
+      toast.error('Preencha os campos obrigatórios')
       return
     }
+    setClientErrors({})
     setSavingClient(true)
     try {
       const res = await apiFetch(`/api/clients/${editingClientId}`, {
         method: 'PUT',
-        body: JSON.stringify(newClientData),
+        body: JSON.stringify(toClientPayload(newClientData)),
       })
       if (!res.ok) {
         const err = await res.json().catch(() => null)
@@ -466,8 +546,8 @@ function NovaNotaPageContent() {
           </div>
 
           {/* New Client Modal */}
-          <Dialog open={showNewClientModal} onOpenChange={(open) => { setShowNewClientModal(open); if (!open) setEditingClientId(null) }}>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
+          <Dialog open={showNewClientModal} onOpenChange={(open) => { setShowNewClientModal(open); if (!open) { setEditingClientId(null); setClientErrors({}) } }}>
+            <DialogContent className="sm:max-w-5xl max-h-[90vh] overflow-y-auto p-0">
               {/* Header */}
               <div className="px-8 pt-8 pb-4">
                 <DialogHeader>
@@ -492,7 +572,9 @@ function NovaNotaPageContent() {
                       }
                       placeholder="Digite o nome completo ou razão social"
                       className="h-11 bg-white border-gray-300"
+                      aria-invalid={!!clientErrors.razaoSocial}
                     />
+                    {clientErrors.razaoSocial && <p className="text-sm text-red-500">{clientErrors.razaoSocial}</p>}
                   </div>
 
                   <div className="space-y-1.5">
@@ -500,7 +582,7 @@ function NovaNotaPageContent() {
                     <div className="flex gap-3">
                       <button
                         type="button"
-                        onClick={() => setNewClientData({ ...newClientData, documentType: 'CPF' })}
+                        onClick={() => setNewClientData({ ...newClientData, documentType: 'CPF', document: '' })}
                         className={`flex-1 h-11 rounded-lg border-2 font-medium text-sm transition-all ${
                           newClientData.documentType === 'CPF'
                             ? 'border-[#7C3AED] bg-[#FAF5FF] text-[#7C3AED]'
@@ -511,7 +593,7 @@ function NovaNotaPageContent() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => setNewClientData({ ...newClientData, documentType: 'CNPJ' })}
+                        onClick={() => setNewClientData({ ...newClientData, documentType: 'CNPJ', document: '' })}
                         className={`flex-1 h-11 rounded-lg border-2 font-medium text-sm transition-all ${
                           newClientData.documentType === 'CNPJ'
                             ? 'border-[#7C3AED] bg-[#FAF5FF] text-[#7C3AED]'
@@ -527,9 +609,20 @@ function NovaNotaPageContent() {
                     <div className="space-y-1.5">
                       <Label className="text-sm text-gray-700">{newClientData.documentType}</Label>
                       <Input
-                        value={newClientData.document}
+                        inputMode="numeric"
+                        value={
+                          newClientData.documentType === 'CPF'
+                            ? formatCpf(newClientData.document)
+                            : formatCnpj(newClientData.document)
+                        }
                         onChange={(e) =>
-                          setNewClientData({ ...newClientData, document: e.target.value })
+                          setNewClientData({
+                            ...newClientData,
+                            document:
+                              newClientData.documentType === 'CPF'
+                                ? extractCpfDigits(e.target.value)
+                                : extractCnpjDigits(e.target.value),
+                          })
                         }
                         placeholder={
                           newClientData.documentType === 'CPF'
@@ -537,7 +630,9 @@ function NovaNotaPageContent() {
                             : '00.000.000/0000-00'
                         }
                         className="h-11 bg-white border-gray-300"
+                        aria-invalid={!!clientErrors.document}
                       />
+                      {clientErrors.document && <p className="text-sm text-red-500">{clientErrors.document}</p>}
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-sm text-gray-700">Email</Label>
@@ -549,20 +644,25 @@ function NovaNotaPageContent() {
                         }
                         placeholder="email@exemplo.com"
                         className="h-11 bg-white border-gray-300"
+                        aria-invalid={!!clientErrors.email}
                       />
+                      {clientErrors.email && <p className="text-sm text-red-500">{clientErrors.email}</p>}
                     </div>
                   </div>
 
                   <div className="space-y-1.5">
                     <Label className="text-sm text-gray-700">Telefone</Label>
                     <Input
-                      value={newClientData.phone}
+                      inputMode="numeric"
+                      value={formatPhone(newClientData.phone ?? '')}
                       onChange={(e) =>
-                        setNewClientData({ ...newClientData, phone: e.target.value })
+                        setNewClientData({ ...newClientData, phone: extractPhoneDigits(e.target.value) })
                       }
                       placeholder="(00) 00000-0000"
                       className="h-11 bg-white border-gray-300 max-w-xs"
+                      aria-invalid={!!clientErrors.phone}
                     />
+                    {clientErrors.phone && <p className="text-sm text-red-500">{clientErrors.phone}</p>}
                   </div>
                 </div>
 
@@ -577,13 +677,16 @@ function NovaNotaPageContent() {
                     <div className="space-y-1.5">
                       <Label className="text-sm text-gray-700">CEP</Label>
                       <Input
-                        value={newClientData.cep}
+                        inputMode="numeric"
+                        value={formatCep(newClientData.cep ?? '')}
                         onChange={(e) =>
-                          setNewClientData({ ...newClientData, cep: e.target.value })
+                          setNewClientData({ ...newClientData, cep: extractCepDigits(e.target.value) })
                         }
                         placeholder="00000-000"
                         className="h-11 bg-white border-gray-300"
+                        aria-invalid={!!clientErrors.cep}
                       />
+                      {clientErrors.cep && <p className="text-sm text-red-500">{clientErrors.cep}</p>}
                     </div>
                     <div className="space-y-1.5 col-span-2">
                       <Label className="text-sm text-gray-700">Logradouro</Label>
@@ -660,8 +763,8 @@ function NovaNotaPageContent() {
                       <MunicipioAutocomplete
                         value={newClientData.municipio || ''}
                         estado={newClientData.estado || ''}
-                        onChange={(name) =>
-                          setNewClientData({ ...newClientData, municipio: name })
+                        onChange={(name, code) =>
+                          setNewClientData({ ...newClientData, municipio: name, codigoMunicipio: code })
                         }
                       />
                     </div>
@@ -675,7 +778,7 @@ function NovaNotaPageContent() {
                 <div className="flex gap-3">
                   <Button
                     variant="outline"
-                    onClick={() => setShowNewClientModal(false)}
+                    onClick={() => { setShowNewClientModal(false); setClientErrors({}) }}
                     className="flex-1 h-11"
                     disabled={savingClient}
                   >
@@ -802,7 +905,13 @@ function NovaNotaPageContent() {
                   <div className="text-center py-8 text-gray-500">
                     <FileText className="w-10 h-10 mx-auto mb-2 text-gray-300" />
                     <p className="font-medium text-sm">Nenhum serviço cadastrado</p>
-                    <p className="text-xs mt-1">Cadastre serviços em Configurações &gt; Serviços</p>
+                    <Button
+                      type="button"
+                      onClick={() => router.push('/configuracoes/servicos')}
+                      className="mt-3 bg-[#7C3AED] hover:bg-[#6D28D9] text-white"
+                    >
+                      Cadastrar serviço
+                    </Button>
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -810,7 +919,12 @@ function NovaNotaPageContent() {
                       <button
                         key={service.id}
                         type="button"
-                        onClick={() => setSelectedService(service.id)}
+                        onClick={() => {
+                          setSelectedService(service.id)
+                          if (service.defaultValue && service.defaultValue > 0) {
+                            setServiceValue(numberToMoneyDigits(service.defaultValue))
+                          }
+                        }}
                         className={`w-full text-left flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${
                           selectedService === service.id
                             ? 'border-[#7C3AED] bg-[#FAF5FF]'
@@ -832,9 +946,14 @@ function NovaNotaPageContent() {
                             <p className="text-sm text-gray-500 truncate">{service.description}</p>
                           )}
                         </div>
-                        <span className="text-xs text-gray-400 flex-shrink-0">
-                          {service.cnae}
-                        </span>
+                        <div className="flex flex-col items-end flex-shrink-0">
+                          {service.defaultValue && service.defaultValue > 0 ? (
+                            <span className={`text-sm font-semibold ${selectedService === service.id ? 'text-[#7C3AED]' : 'text-gray-900'}`}>
+                              {service.defaultValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                            </span>
+                          ) : null}
+                          <span className="text-xs text-gray-400">{service.cnae}</span>
+                        </div>
                       </button>
                     ))}
                   </div>
