@@ -86,11 +86,11 @@ export function Hero() {
                   />
                 ))}
               </div>
-              <span className="text-gray-600">4.9 (2.3k avaliações)</span>
+              <span className="text-gray-600">4.9 (50+ avaliações)</span>
             </div>
             <div className="flex items-center gap-2 text-gray-600">
               <TrendingUp className="w-4 h-4 text-emerald-600" />
-              <span>50k+ empresas ativas</span>
+              <span>200+ empresas ativas</span>
             </div>
           </div>
 

@@ -3,10 +3,7 @@
 import {
   Download,
   Smartphone,
-  Monitor,
   Apple,
-  Star,
-  Users,
   CheckCircle,
   ExternalLink,
 } from "lucide-react";
@@ -19,8 +16,6 @@ const platforms = [
     title: "Google Play",
     subtitle: "Android 8.0+",
     description: "App nativo com sincronização em tempo real",
-    rating: 4.8,
-    downloads: "10k+",
     color: "from-green-500 to-emerald-500",
     bgColor: "bg-gradient-to-br from-green-50 to-emerald-50",
     features: [
@@ -35,8 +30,6 @@ const platforms = [
     title: "App Store",
     subtitle: "iOS 14.0+",
     description: "Interface otimizada para iPhone",
-    rating: 4.9,
-    downloads: "8k+",
     color: "from-blue-500 to-indigo-500",
     bgColor: "bg-gradient-to-br from-blue-50 to-indigo-50",
     features: [
@@ -46,29 +39,11 @@ const platforms = [
     ],
     popular: false,
   },
-  {
-    icon: Monitor,
-    title: "Desktop",
-    subtitle: "Windows",
-    description:
-      "Versão completa com recursos avançados e integração com sistemas",
-    rating: 4.9,
-    downloads: "25k+",
-    color: "from-violet-500 to-purple-500",
-    bgColor: "bg-gradient-to-br from-violet-50 to-purple-50",
-    features: [
-      "Recursos completos",
-      "Integração APIs",
-      "Multi-monitor",
-    ],
-    popular: true,
-  },
 ];
 
 const globalStats = [
-  { label: "Downloads totais", value: "50k+" },
   { label: "Avaliação média", value: "4.9" },
-  { label: "Empresas ativas", value: "12k+" },
+  { label: "Empresas ativas", value: "200+" },
 ];
 
 export function Downloads() {
@@ -126,7 +101,7 @@ export function Downloads() {
         </div>
 
         {/* Platform cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-16">
           {platforms.map((platform, index) => {
             const Icon = platform.icon;
             return (
@@ -176,28 +151,6 @@ export function Downloads() {
                       <p className="text-gray-600 leading-relaxed mb-4">
                         {platform.description}
                       </p>
-                    </div>
-
-                    {/* Stats */}
-                    <div className="flex justify-center gap-6 mb-6 text-sm">
-                      <div className="text-center">
-                        <div className="flex items-center gap-1 justify-center mb-1">
-                          <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                          <span className="text-gray-700 font-medium">
-                            {platform.rating}
-                          </span>
-                        </div>
-                        <div className="text-gray-500">Avaliação</div>
-                      </div>
-                      <div className="text-center">
-                        <div className="flex items-center gap-1 justify-center mb-1">
-                          <Users className="w-4 h-4 text-blue-500" />
-                          <span className="text-gray-700 font-medium">
-                            {platform.downloads}
-                          </span>
-                        </div>
-                        <div className="text-gray-500">Downloads</div>
-                      </div>
                     </div>
 
                     {/* Features */}

@@ -37,8 +37,8 @@ const highlights = [
     icon: Smartphone,
     title: "Experiência unificada",
     description:
-      "Sincronização perfeita entre Desktop, Android e iOS com dados na nuvem",
-    metric: "3",
+      "Sincronização perfeita entre Android e iOS com dados na nuvem",
+    metric: "2",
     metricLabel: "plataformas",
     color: "from-blue-400 to-indigo-500",
     bgColor:
@@ -49,13 +49,13 @@ const highlights = [
 const stats = [
   {
     icon: Users,
-    value: "50k+",
+    value: "200+",
     label: "empresas ativas",
     color: "text-violet-600",
   },
   {
     icon: TrendingUp,
-    value: "2.5M+",
+    value: "30k+",
     label: "NFS-e emitidas",
     color: "text-emerald-600",
   },
