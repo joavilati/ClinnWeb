@@ -1,7 +1,6 @@
 /**
- * Cache local persistente (localStorage).
- * Dados persistem entre sessões e após logout.
- * Usado para: serviços, clientes, configurações, perfil.
+ * Cache local persistente (localStorage), escopado por usuário.
+ * Limpo em logout e ao trocar de CNPJ — ver `clearAllCache`.
  */
 
 const PREFIX = 'clinnota_cache_'
@@ -36,13 +35,17 @@ export function removeCache(key: string): void {
 }
 
 /**
- * Limpa apenas dados voláteis (dashboard, notas).
- * NÃO limpa: serviços, clientes, configurações, perfil.
+ * Remove todas as chaves de cache de dados do usuário (`clinnota_cache_*`).
+ * Chamado no logout e ao detectar troca de CNPJ no login.
  */
-export function clearVolatileCache(): void {
+export function clearAllCache(): void {
   if (typeof window === 'undefined') return
-  removeCache('dashboard')
-  removeCache('notes')
+  const keysToRemove: string[] = []
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i)
+    if (key && key.startsWith(PREFIX)) keysToRemove.push(key)
+  }
+  for (const key of keysToRemove) localStorage.removeItem(key)
 }
 
 // Keys usadas no sistema
