@@ -196,5 +196,8 @@ export function normalizeLicense(raw: unknown): License {
     features: Array.isArray(data.features) ? data.features : undefined,
     createdAt: data.createdAt ? Number(data.createdAt) : undefined,
     updatedAt: data.updatedAt ? Number(data.updatedAt) : undefined,
+    freeNotesQuota: Number(data.freeNotesQuota) || undefined,
+    notesUsedThisMonth: Number(data.notesUsedThisMonth) || 0,
+    quotaPeriodEnd: Number(data.quotaPeriodEnd) || undefined,
   }
 }

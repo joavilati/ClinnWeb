@@ -161,6 +161,9 @@ export interface License {
   features?: string[]
   createdAt?: number
   updatedAt?: number
+  freeNotesQuota?: number
+  notesUsedThisMonth?: number
+  quotaPeriodEnd?: number
 }
 
 // ===== Fiscal Config =====

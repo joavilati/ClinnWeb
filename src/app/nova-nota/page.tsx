@@ -30,7 +30,7 @@ import type { Client, Service, CreateClientRequest } from '@/types'
 import { normalizeClients, normalizeServices } from '@/lib/normalizers'
 import { CACHE_KEYS, removeCache } from '@/lib/localCache'
 import { isLicenseActive } from '@/lib/licenseGuard'
-import { LicenseExpiredModal } from '@/components/LicenseExpiredModal'
+import { LicenseExpiredModal, type LicenseBlockReason } from '@/components/LicenseExpiredModal'
 import { formatMoney, extractMoneyDigits, moneyDigitsToNumber, numberToMoneyDigits, formatPercent, percentDigitsToNumber, formatPhone, extractPhoneDigits, formatCnpj, extractCnpjDigits, formatCpf, extractCpfDigits, formatCep, extractCepDigits } from '@/lib/masks'
 import { isValidCpf, isValidCnpj } from '@/lib/validators'
 import { ESTADOS } from '@/lib/constants'
@@ -96,6 +96,7 @@ function NovaNotaPageContent() {
 
   // ---------- License check ----------
   const [showLicenseModal, setShowLicenseModal] = useState(false)
+  const [licenseModalReason, setLicenseModalReason] = useState<LicenseBlockReason>('license_expired')
 
   useEffect(() => {
     if (!isLicenseActive()) {
@@ -310,6 +311,12 @@ function NovaNotaPageContent() {
 
       if (!res.ok) {
         const err = await res.json().catch(() => null)
+        if (res.status === 402) {
+          const reason = err?.reason as LicenseBlockReason | undefined
+          setLicenseModalReason(reason || 'license_expired')
+          setShowLicenseModal(true)
+          return
+        }
         throw new Error(err?.message || 'Erro ao emitir nota')
       }
 
@@ -445,7 +452,7 @@ function NovaNotaPageContent() {
     setEmittedNoteId('')
   }
 
-  const licenseModal = <LicenseExpiredModal open={showLicenseModal} onClose={() => setShowLicenseModal(false)} />
+  const licenseModal = <LicenseExpiredModal open={showLicenseModal} reason={licenseModalReason} onClose={() => setShowLicenseModal(false)} />
 
   // ====================================================
   // STEP 1 - CLIENT SELECTION

@@ -12,13 +12,33 @@ import { Button } from '@/components/ui/button'
 import { Lock } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
+export type LicenseBlockReason = 'quota_exceeded' | 'license_expired' | 'license_suspended'
+
 interface LicenseExpiredModalProps {
   open: boolean
   onClose: () => void
+  reason?: LicenseBlockReason
 }
 
-export function LicenseExpiredModal({ open, onClose }: LicenseExpiredModalProps) {
+const reasonContent: Record<LicenseBlockReason, { title: string; description: string }> = {
+  quota_exceeded: {
+    title: 'Limite de notas atingido',
+    description:
+      'Você usou todas as notas grátis deste mês. Assine um plano para emitir notas ilimitadas.',
+  },
+  license_expired: {
+    title: 'Licença Expirada',
+    description: 'Sua licença expirou. Renove para continuar emitindo notas.',
+  },
+  license_suspended: {
+    title: 'Licença Suspensa',
+    description: 'Sua licença está suspensa. Renove para continuar emitindo notas.',
+  },
+}
+
+export function LicenseExpiredModal({ open, onClose, reason = 'license_expired' }: LicenseExpiredModalProps) {
   const router = useRouter()
+  const content = reasonContent[reason] ?? reasonContent.license_expired
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
@@ -28,9 +48,9 @@ export function LicenseExpiredModal({ open, onClose }: LicenseExpiredModalProps)
             <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
               <Lock className="w-8 h-8 text-red-600" />
             </div>
-            <DialogTitle className="text-xl">Licença Expirada</DialogTitle>
+            <DialogTitle className="text-xl">{content.title}</DialogTitle>
             <DialogDescription className="mt-2">
-              Sua licença expirou. Renove para continuar emitindo notas.
+              {content.description}
             </DialogDescription>
           </div>
         </DialogHeader>

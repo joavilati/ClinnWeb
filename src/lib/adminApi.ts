@@ -55,6 +55,12 @@ export const adminApi = {
       body: body ? JSON.stringify(body) : undefined
     }),
 
+  put: <T = unknown>(path: string, body?: unknown) =>
+    adminFetch<T>(path, {
+      method: 'PUT',
+      body: body ? JSON.stringify(body) : undefined
+    }),
+
   patch: <T = unknown>(path: string, body?: unknown) =>
     adminFetch<T>(path, {
       method: 'PATCH',

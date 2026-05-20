@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import DashboardLayout from '@/components/DashboardLayout'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Check, CheckCircle, CreditCard, HeadphonesIcon, Loader2, Clock, RefreshCw } from 'lucide-react'
+import { Check, CheckCircle, CreditCard, HeadphonesIcon, Loader2, Clock, RefreshCw, FileText } from 'lucide-react'
 import { toast } from 'sonner'
 import { useApiClient } from '@/hooks/useApiClient'
 import { useCachedData } from '@/hooks/useCachedData'
@@ -30,9 +30,11 @@ const annualFeatures = [
 
 function formatLicenseType(type: string): string {
   switch (type.toLowerCase()) {
+    case 'free': return 'Grátis'
     case 'trial': return 'Trial (7 dias)'
     case 'monthly': return 'Mensal'
     case 'annual': return 'Anual'
+    case 'unlimited': return 'Ilimitada'
     default: return type
   }
 }
@@ -128,6 +130,15 @@ function PagamentosContent() {
   const daysRemaining = license?.endDate ? Math.max(0, Math.ceil((license.endDate - Date.now()) / (1000 * 60 * 60 * 24))) : 0
   const statusColor = statusLower === 'active' ? 'bg-green-500' : statusLower === 'expired' ? 'bg-red-500' : 'bg-amber-500'
 
+  const isFree = currentType === 'FREE'
+  const quota = license?.freeNotesQuota ?? 0
+  const used = license?.notesUsedThisMonth ?? 0
+  const quotaPct = quota > 0 ? Math.min(100, Math.round((used / quota) * 100)) : 0
+  const quotaExhausted = quota > 0 && used >= quota
+  const quotaRenewDate = license?.quotaPeriodEnd
+    ? new Date(license.quotaPeriodEnd).toLocaleDateString('pt-BR')
+    : null
+
   return (
     <DashboardLayout>
       <div className="min-h-screen bg-background p-8">
@@ -172,6 +183,46 @@ function PagamentosContent() {
                   </div>
                 )}
               </div>
+            </Card>
+          )}
+
+          {/* Free Quota Usage Card */}
+          {license && isFree && (
+            <Card className="border-none shadow-lg mb-8 overflow-hidden">
+              <CardContent className="p-5">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-full bg-[#7C3AED]/10 flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-[#7C3AED]" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm text-foreground">Notas grátis este mês</p>
+                    <p className="text-xs text-muted-foreground">
+                      {used} de {quota} notas grátis usadas este mês
+                    </p>
+                  </div>
+                </div>
+
+                <div className="h-3 w-full rounded-full bg-muted overflow-hidden">
+                  <div
+                    className={`h-3 rounded-full transition-all ${quotaExhausted ? 'bg-red-500' : 'bg-[#7C3AED]'}`}
+                    style={{ width: `${quotaPct}%` }}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between mt-3">
+                  {quotaRenewDate ? (
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      <span>Renova em {quotaRenewDate}</span>
+                    </div>
+                  ) : <span />}
+                  {quotaExhausted && (
+                    <span className="text-xs font-semibold text-red-600">
+                      Cota esgotada
+                    </span>
+                  )}
+                </div>
+              </CardContent>
             </Card>
           )}
 

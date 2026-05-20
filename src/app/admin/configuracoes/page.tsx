@@ -6,13 +6,18 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Switch } from "@/components/ui/switch"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   Settings,
   UserPlus,
   Bell,
   ClipboardList,
   Shield,
+  FileText,
+  Loader2,
 } from "lucide-react"
+import { toast } from "sonner"
 import { adminApi } from "@/lib/adminApi"
 import type { AdminUser, AdminAuditEntry } from "@/types/admin"
 
@@ -30,20 +35,46 @@ export default function ConfiguracoesPage() {
     pagamentoAtrasado: false,
   })
 
+  // Configuracao da cota de notas gratis (plano FREE)
+  const [freeNotesQuota, setFreeNotesQuota] = useState<string>("")
+  const [savingQuota, setSavingQuota] = useState(false)
+
   useEffect(() => {
     Promise.all([
       adminApi.get<AdminUser[]>("admin-users").catch(() => []),
       adminApi.get<AdminAuditEntry[]>("audit-log").catch(() => []),
+      adminApi.get<{ freeNotesQuota: number }>("license-config").catch(() => null),
     ])
-      .then(([users, audit]) => {
+      .then(([users, audit, licenseConfig]) => {
         setAdminUsers(users)
         setAuditLog(audit)
+        if (licenseConfig && typeof licenseConfig.freeNotesQuota === "number") {
+          setFreeNotesQuota(String(licenseConfig.freeNotesQuota))
+        }
       })
       .finally(() => setLoading(false))
   }, [])
 
   const toggleNotification = (key: keyof typeof notifications) => {
     setNotifications((prev) => ({ ...prev, [key]: !prev[key] }))
+  }
+
+  const handleSaveQuota = async () => {
+    const value = Number(freeNotesQuota)
+    if (!Number.isFinite(value) || value < 0 || !Number.isInteger(value)) {
+      toast.error("Informe um número inteiro válido de notas grátis")
+      return
+    }
+    setSavingQuota(true)
+    try {
+      await adminApi.put("license-config", { freeNotesQuota: value })
+      toast.success("Cota de notas grátis atualizada")
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Erro ao salvar configuração"
+      toast.error(message)
+    } finally {
+      setSavingQuota(false)
+    }
   }
 
   if (loading) {
@@ -66,6 +97,53 @@ export default function ConfiguracoesPage() {
           <p className="text-sm text-gray-500">Gerencie admins, notificações e auditoria</p>
         </div>
       </div>
+
+      {/* Plano FREE - Cota de notas gratis */}
+      <Card className="border-0 shadow-xl">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-800">
+            <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 shadow-lg">
+              <FileText className="w-4 h-4 text-white" />
+            </div>
+            Plano Grátis
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col sm:flex-row sm:items-end gap-4">
+            <div className="flex-1 max-w-xs space-y-2">
+              <Label htmlFor="freeNotesQuota" className="text-sm font-semibold text-gray-800">
+                Notas grátis por mês
+              </Label>
+              <Input
+                id="freeNotesQuota"
+                type="number"
+                min={0}
+                step={1}
+                value={freeNotesQuota}
+                onChange={(e) => setFreeNotesQuota(e.target.value)}
+                placeholder="Ex: 5"
+              />
+              <p className="text-xs text-gray-500">
+                Quantidade de notas que cada conta no plano grátis pode emitir por mês.
+              </p>
+            </div>
+            <Button
+              onClick={handleSaveQuota}
+              disabled={savingQuota}
+              className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white hover:from-purple-600 hover:to-indigo-700 shadow-lg"
+            >
+              {savingQuota ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                "Salvar"
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Admin Users Section */}
       <Card className="border-0 shadow-xl">

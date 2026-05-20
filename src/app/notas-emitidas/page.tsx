@@ -29,7 +29,7 @@ import { useCachedData } from '@/hooks/useCachedData'
 import { normalizeNotes } from '@/lib/normalizers'
 import { CACHE_KEYS, removeCache } from '@/lib/localCache'
 import { isLicenseActive } from '@/lib/licenseGuard'
-import { LicenseExpiredModal } from '@/components/LicenseExpiredModal'
+import { LicenseExpiredModal, type LicenseBlockReason } from '@/components/LicenseExpiredModal'
 import { MESES } from '@/lib/constants'
 import type { NfseNote, NoteStatus } from '@/types'
 
@@ -79,6 +79,7 @@ export default function NotasEmitidasPage() {
   const [cancelMotivo, setCancelMotivo] = useState('')
   const [cancelNoteId, setCancelNoteId] = useState<string | null>(null)
   const [showLicenseModal, setShowLicenseModal] = useState(false)
+  const [licenseModalReason, setLicenseModalReason] = useState<LicenseBlockReason>('license_expired')
   const [reloading, setReloading] = useState(false)
 
   const { data: allNotes, error, isLoading, reload } = useCachedData<NfseNote[]>({
@@ -178,7 +179,7 @@ export default function NotasEmitidasPage() {
 
   return (
     <DashboardLayout>
-      <LicenseExpiredModal open={showLicenseModal} onClose={() => setShowLicenseModal(false)} />
+      <LicenseExpiredModal open={showLicenseModal} reason={licenseModalReason} onClose={() => setShowLicenseModal(false)} />
       <div className="min-h-screen bg-background p-4 sm:p-6 lg:p-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}

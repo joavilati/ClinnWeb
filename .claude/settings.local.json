@@ -34,7 +34,9 @@
       "PowerShell(\\(git status --short | Measure-Object -Line\\).Lines)",
       "Bash(git remote *)",
       "Bash(Select-Object -First 5)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)"
     ]
   }
 }
