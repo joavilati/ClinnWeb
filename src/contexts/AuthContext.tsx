@@ -2,9 +2,10 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import * as Sentry from '@sentry/nextjs'
+import { toast } from 'sonner'
 import { hasSession, clearSession } from '@/lib/tokenCache'
 import { encodePassword } from '@/lib/passwordEncoder'
-import { clearVolatileCache } from '@/lib/localCache'
+import { clearAllCache } from '@/lib/localCache'
 import { clearLicenseCache } from '@/lib/licenseGuard'
 import { STORAGE_KEYS } from '@/lib/constants'
 
@@ -91,6 +92,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const userName = (emissor.companyName as string) || (emissor.tradeName as string) || ''
     const userEmail = (emissor.email as string) || ''
 
+    // Se o CNPJ logado é diferente do anterior, descarta caches do usuário antigo
+    // que ainda estejam no localStorage (notas, serviços, clientes, perfil etc).
+    const previousCnpj = localStorage.getItem(STORAGE_KEYS.USER_CNPJ)
+    if (previousCnpj && previousCnpj !== cnpj) {
+      clearAllCache()
+      clearLicenseCache()
+    }
+
     localStorage.setItem(STORAGE_KEYS.USER_ID, userId)
     localStorage.setItem(STORAGE_KEYS.USER_CNPJ, cnpj)
     if (userName) localStorage.setItem(STORAGE_KEYS.USER_NAME, userName)
@@ -120,6 +129,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const emissor = extractEmissor(body)
     const userId = (emissor.id as string) || ''
 
+    const previousCnpj = localStorage.getItem(STORAGE_KEYS.USER_CNPJ)
+    if (previousCnpj && previousCnpj !== cnpj) {
+      clearAllCache()
+      clearLicenseCache()
+    }
+
     localStorage.setItem(STORAGE_KEYS.USER_ID, userId)
     localStorage.setItem(STORAGE_KEYS.USER_CNPJ, cnpj)
     localStorage.setItem(STORAGE_KEYS.USER_EMAIL, email)
@@ -137,9 +152,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {})
     } finally {
       clearSession()
-      clearVolatileCache()
+      clearAllCache()
       clearLicenseCache()
       setUser(null)
+      toast.success('Sessão encerrada. Seus dados locais foram removidos deste dispositivo.')
     }
   }, [])
 
