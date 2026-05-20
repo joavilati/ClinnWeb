@@ -16,6 +16,7 @@ import {
   Shield,
   FileText,
   Loader2,
+  Smartphone,
 } from "lucide-react"
 import { toast } from "sonner"
 import { adminApi } from "@/lib/adminApi"
@@ -39,17 +40,33 @@ export default function ConfiguracoesPage() {
   const [freeNotesQuota, setFreeNotesQuota] = useState<string>("")
   const [savingQuota, setSavingQuota] = useState(false)
 
+  // Configuracao do botao do site no app mobile (remote config)
+  const [siteButtonEnabled, setSiteButtonEnabled] = useState(false)
+  const [siteUrl, setSiteUrl] = useState<string>("https://clinnota.com.br")
+  const [savingAppConfig, setSavingAppConfig] = useState(false)
+
   useEffect(() => {
     Promise.all([
       adminApi.get<AdminUser[]>("admin-users").catch(() => []),
       adminApi.get<AdminAuditEntry[]>("audit-log").catch(() => []),
       adminApi.get<{ freeNotesQuota: number }>("license-config").catch(() => null),
+      adminApi
+        .get<{ siteButtonEnabled: boolean; siteUrl: string }>("app-config")
+        .catch(() => null),
     ])
-      .then(([users, audit, licenseConfig]) => {
+      .then(([users, audit, licenseConfig, appConfig]) => {
         setAdminUsers(users)
         setAuditLog(audit)
         if (licenseConfig && typeof licenseConfig.freeNotesQuota === "number") {
           setFreeNotesQuota(String(licenseConfig.freeNotesQuota))
+        }
+        if (appConfig) {
+          if (typeof appConfig.siteButtonEnabled === "boolean") {
+            setSiteButtonEnabled(appConfig.siteButtonEnabled)
+          }
+          if (typeof appConfig.siteUrl === "string" && appConfig.siteUrl) {
+            setSiteUrl(appConfig.siteUrl)
+          }
         }
       })
       .finally(() => setLoading(false))
@@ -74,6 +91,28 @@ export default function ConfiguracoesPage() {
       toast.error(message)
     } finally {
       setSavingQuota(false)
+    }
+  }
+
+  const handleSaveAppConfig = async () => {
+    const trimmedUrl = siteUrl.trim()
+    if (!trimmedUrl) {
+      toast.error("Informe a URL do site")
+      return
+    }
+    setSavingAppConfig(true)
+    try {
+      await adminApi.put("app-config", {
+        siteButtonEnabled,
+        siteUrl: trimmedUrl,
+      })
+      setSiteUrl(trimmedUrl)
+      toast.success("Configuração do app atualizada")
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Erro ao salvar configuração"
+      toast.error(message)
+    } finally {
+      setSavingAppConfig(false)
     }
   }
 
@@ -141,6 +180,66 @@ export default function ConfiguracoesPage() {
                 "Salvar"
               )}
             </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Botao do site no app mobile */}
+      <Card className="border-0 shadow-xl">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-3 text-lg font-semibold text-gray-800">
+            <div className="p-2 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-500 shadow-lg">
+              <Smartphone className="w-4 h-4 text-white" />
+            </div>
+            Botão do site no app
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            <div className="flex items-center justify-between p-4 rounded-xl bg-gray-50">
+              <div>
+                <p className="text-sm font-semibold text-gray-800">Mostrar botão do site no app</p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  Quando ativado, o app exibe um botão que abre o site da ClinNota.
+                </p>
+              </div>
+              <Switch
+                checked={siteButtonEnabled}
+                onCheckedChange={setSiteButtonEnabled}
+              />
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-end gap-4">
+              <div className="flex-1 space-y-2">
+                <Label htmlFor="siteUrl" className="text-sm font-semibold text-gray-800">
+                  URL do site
+                </Label>
+                <Input
+                  id="siteUrl"
+                  type="url"
+                  value={siteUrl}
+                  onChange={(e) => setSiteUrl(e.target.value)}
+                  placeholder="https://clinnota.com.br"
+                />
+                <p className="text-xs text-gray-500">
+                  Endereço aberto pelo botão no app.
+                </p>
+              </div>
+              <Button
+                onClick={handleSaveAppConfig}
+                disabled={savingAppConfig}
+                className="bg-gradient-to-r from-teal-500 to-emerald-600 text-white hover:from-teal-600 hover:to-emerald-700 shadow-lg"
+              >
+                {savingAppConfig ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Salvando...
+                  </>
+                ) : (
+                  "Salvar"
+                )}
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
